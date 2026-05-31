@@ -370,13 +370,18 @@ input[type=datetime-local]{color-scheme:dark}
             <input type="password" id="api-key" placeholder="Cole sua chave do football-data.org"/>
           </div>
         </div>
-        <div style="font-size:12px;color:var(--muted);margin-bottom:10px">
-          Chave gratuita em <a href="https://www.football-data.org/client/register" target="_blank" style="color:var(--green)">football-data.org/client/register</a>
+        <div style="background:rgba(0,214,126,.07);border:1px solid rgba(0,214,126,.2);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--green);margin-bottom:10px">
+          &#9889; <strong>Importação automática gratuita</strong> via openfootball (GitHub) — sem chave, sem CORS, funciona em qualquer lugar.<br>
+          <span style="color:var(--muted)">Fallback automático para football-data.org se necessário (chave abaixo).</span>
+        </div>
+        <div class="ff" style="margin-bottom:10px">
+          <label>Chave football-data.org (opcional — fallback)</label>
+          <input type="password" id="api-key" placeholder="Opcional: cole sua chave do football-data.org"/>
         </div>
         <div class="api-actions">
-          <button class="btn-api prim" onclick="importMatches()">&#128229; Importar jogos</button>
+          <button class="btn-api prim" onclick="importMatches()">&#128229; Importar todos os jogos</button>
           <button class="btn-api" onclick="syncResults()">&#128260; Sincronizar resultados</button>
-          <button class="btn-api" onclick="clearApiMatches()" style="border-color:rgba(231,76,60,.3);color:var(--red)">&#128465; Limpar importados</button>
+          <button class="btn-api" onclick="clearApiMatches()" style="border-color:rgba(231,76,60,.3);color:var(--red)">&#128465; Limpar</button>
         </div>
         <div class="pbar" id="pbar"><div class="pfill" id="pfill"></div></div>
         <div class="api-status"><span><span class="dot idle" id="api-dot"></span><span id="api-txt">Aguardando</span></span><span id="api-sync" style="color:var(--muted)"></span></div>
@@ -836,18 +841,78 @@ function renderAdmin(){
   renderAdminMatches();renderAdminUsers();
 }
 
+// ── Copa 2026 via openfootball (GitHub, sem chave, sem CORS) ──────────────────
+const OF_URL='https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json';
+
+function parseOFTime(date,time){
+  if(!time)return date+'T20:00:00Z';
+  const parts=time.split(' ');
+  const [h,m]=parts[0].split(':').map(Number);
+  const tzOff=parts[1]?parseInt(parts[1].replace('UTC',''))||0:0;
+  const utcH=((h-tzOff)%24+24)%24;
+  return date+'T'+String(utcH).padStart(2,'0')+':'+String(m||0).padStart(2,'0')+':00Z';
+}
+
+function parseOFPhase(round,group){
+  if(group)return group.replace('Group ','Grupo ');
+  if(!round)return'Copa 2026';
+  const r=round.toLowerCase();
+  if(r.includes('round of 32'))return'32 avos de Final';
+  if(r.includes('round of 16'))return'Oitavas de Final';
+  if(r.includes('quarter'))return'Quartas de Final';
+  if(r.includes('semi'))return'Semifinal';
+  if(r.includes('third')||r.includes('3rd'))return'3º Lugar';
+  if(r.includes('final'))return'Final';
+  return round;
+}
+
 async function importMatches(){
-  const key=document.getElementById('api-key').value.trim();
-  if(!key){toast('Cole sua chave da API!','t-err');return;}
-  setDot('idle','Importando...');setProgress(10);
+  setDot('idle','Importando da Copa 2026...');setProgress(10);
   toast('Importando jogos da Copa 2026...','t-info');
   try{
-    setProgress(30);
-    const res=await fetch('https://api.football-data.org/v4/competitions/WC/matches',{headers:{'X-Auth-Token':key}});
-    setProgress(65);
-    const data=await res.json();
-    if(!res.ok)throw new Error(data.message||'Erro '+res.status);
-    const matches=(data.matches||[]).map(m=>({id:'fd_'+m.id,phase:stageLabel(m.stage,m.group),t1:m.homeTeam.name||'A definir',f1:flag(m.homeTeam.name||''),t2:m.awayTeam.name||'A definir',f2:flag(m.awayTeam.name||''),dt:m.utcDate,type:isElimStage(m.stage)?'elim':'grupo',r1:m.status==='FINISHED'?m.score.fullTime.home:null,r2:m.status==='FINISHED'?m.score.fullTime.away:null,clf:null,apiId:m.id}));
+    // Tenta openfootball (gratuito, sem chave, funciona em qualquer lugar)
+    setProgress(20);
+    let matches=[];
+    try{
+      const res=await fetch(OF_URL);
+      if(!res.ok)throw new Error('openfootball '+res.status);
+      setProgress(50);
+      const data=await res.json();
+      matches=(data.matches||[]).map((m,i)=>{
+        const group=m.group||null;
+        return{
+          id:'of_'+i,
+          phase:parseOFPhase(m.round,group),
+          t1:m.team1||'A definir',f1:flag(m.team1||''),
+          t2:m.team2||'A definir',f2:flag(m.team2||''),
+          dt:parseOFTime(m.date,m.time),
+          type:group?'grupo':'elim',
+          r1:(m.score1!=null)?m.score1:null,
+          r2:(m.score2!=null)?m.score2:null,
+          clf:null,apiId:'of_'+i
+        };
+      });
+      setDot('ok','✓ openfootball carregado');
+    }catch(ofErr){
+      // Fallback: football-data.org com chave
+      const key=document.getElementById('api-key').value.trim();
+      if(!key)throw new Error('Sem conexão com openfootball e sem chave de API configurada.');
+      setDot('idle','Tentando football-data.org...');setProgress(40);
+      const res=await fetch('https://api.football-data.org/v4/competitions/WC/matches',{headers:{'X-Auth-Token':key}});
+      setProgress(65);
+      const data=await res.json();
+      if(!res.ok)throw new Error(data.message||'Erro '+res.status);
+      matches=(data.matches||[]).map(m=>({
+        id:'fd_'+m.id,phase:stageLabel(m.stage,m.group),
+        t1:m.homeTeam.name||'A definir',f1:flag(m.homeTeam.name||''),
+        t2:m.awayTeam.name||'A definir',f2:flag(m.awayTeam.name||''),
+        dt:m.utcDate,type:isElimStage(m.stage)?'elim':'grupo',
+        r1:m.status==='FINISHED'?m.score.fullTime.home:null,
+        r2:m.status==='FINISHED'?m.score.fullTime.away:null,
+        clf:null,apiId:m.id
+      }));
+    }
+    if(!matches.length)throw new Error('Nenhum jogo retornado.');
     setProgress(85);
     const manual=Object.values(_matches).filter(m=>!m.apiId);
     const all={};manual.forEach(m=>{all[m.id]=m;});matches.forEach(m=>{all[m.id]=m;});
@@ -856,21 +921,44 @@ async function importMatches(){
     const now=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
     document.getElementById('api-sync').textContent='Importado às '+now;
     setDot('ok',`✓ ${matches.length} jogos importados`);
-    toast(`✓ ${matches.length} jogos importados!`);
+    toast(`✓ ${matches.length} jogos importados com sucesso!`);
   }catch(e){setProgress(-1);setDot('err','✗ '+e.message);toast('Erro: '+e.message,'t-err');}
 }
 
 async function syncResults(){
-  const key=document.getElementById('api-key').value.trim();
-  if(!key){toast('Cole sua chave da API!','t-err');return;}
-  setDot('idle','Sincronizando...');setProgress(10);
+  setDot('idle','Sincronizando resultados...');setProgress(10);
+  toast('Buscando resultados atualizados...','t-info');
   try{
-    const res=await fetch('https://api.football-data.org/v4/competitions/WC/matches?status=FINISHED',{headers:{'X-Auth-Token':key}});
-    setProgress(55);const data=await res.json();
-    if(!res.ok)throw new Error(data.message||'Erro '+res.status);
-    const updates={};let updated=0;
-    (data.matches||[]).forEach(m=>{const k='fd_'+m.id;if(_matches[k]){updates[`matches/${k}/r1`]=m.score.fullTime.home;updates[`matches/${k}/r2`]=m.score.fullTime.away;updated++;}});
-    if(updated>0)await db.ref().update(updates);
+    // Tenta openfootball (atualiza scores após cada jogo)
+    let updated=0;
+    try{
+      const res=await fetch(OF_URL);
+      if(!res.ok)throw new Error('openfootball '+res.status);
+      setProgress(50);
+      const data=await res.json();
+      const ms=Object.values(_matches);
+      const updates={};
+      (data.matches||[]).forEach((m,i)=>{
+        if(m.score1!=null&&m.score2!=null){
+          const local=ms.find(x=>x.apiId==='of_'+i);
+          if(local){updates[`matches/${local.id}/r1`]=m.score1;updates[`matches/${local.id}/r2`]=m.score2;updated++;}
+        }
+      });
+      if(updated>0)await db.ref().update(updates);
+    }catch(ofErr){
+      // Fallback: football-data.org
+      const key=document.getElementById('api-key').value.trim();
+      if(!key)throw new Error('Sem conexão. Configure a chave do football-data.org para sincronizar.');
+      const res=await fetch('https://api.football-data.org/v4/competitions/WC/matches?status=FINISHED',{headers:{'X-Auth-Token':key}});
+      setProgress(55);const data=await res.json();
+      if(!res.ok)throw new Error(data.message||'Erro '+res.status);
+      const updates2={};
+      (data.matches||[]).forEach(m=>{
+        const k='fd_'+m.id;
+        if(_matches[k]){updates2[`matches/${k}/r1`]=m.score.fullTime.home;updates2[`matches/${k}/r2`]=m.score.fullTime.away;updated++;}
+      });
+      if(updated>0)await db.ref().update(updates2);
+    }
     setProgress(100);setTimeout(()=>setProgress(-1),800);
     const now=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
     document.getElementById('api-sync').textContent='Sync às '+now;
