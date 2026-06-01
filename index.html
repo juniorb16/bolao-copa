@@ -1,4 +1,53 @@
-<!DOCTYPE html>
+const CC={
+  'Argentina':'ar','Australia':'au','Austria':'at','Belgium':'be',
+  'Bosnia and Herzegovina':'ba','Brazil':'br','Brasil':'br','Canada':'ca',
+  'Canadá':'ca','Cape Verde':'cv','Cabo Verde':'cv','Colombia':'co',
+  'Colômbia':'co','Croatia':'hr','Croácia':'hr','Croacia':'hr',
+  "Curaçao":'cw','Czech Republic':'cz','República Tcheca':'cz',
+  'DR Congo':'cd','Congo':'cd','Ecuador':'ec','Equador':'ec',
+  'Egypt':'eg','Egito':'eg','Egipto':'eg','England':'gb-eng',
+  'Inglaterra':'gb-eng','France':'fr','França':'fr','Franca':'fr',
+  'Germany':'de','Alemanha':'de','Ghana':'gh','Gana':'gh',
+  'Haiti':'ht','Iran':'ir','Irã':'ir','Ira':'ir','Iraq':'iq',
+  'Iraque':'iq','Japan':'jp','Japão':'jp','Japao':'jp',
+  'Jordan':'jo','Jordânia':'jo','Jordania':'jo','Mexico':'mx',
+  'México':'mx','Morocco':'ma','Marrocos':'ma','Netherlands':'nl',
+  'Países Baixos':'nl','Paises Baixos':'nl','New Zealand':'nz',
+  'Nova Zelândia':'nz','Nova Zelandia':'nz','Norway':'no',
+  'Noruega':'no','Panama':'pa','Panamá':'pa','Paraguay':'py',
+  'Paraguai':'py','Portugal':'pt','Qatar':'qa','Catar':'qa',
+  'Saudi Arabia':'sa','Arábia Saudita':'sa','Arabia Saudita':'sa',
+  'Scotland':'gb-sct','Escócia':'gb-sct','Escocia':'gb-sct',
+  'Senegal':'sn','South Africa':'za','África do Sul':'za',
+  'South Korea':'kr','Coreia do Sul':'kr','Spain':'es',
+  'Espanha':'es','Sweden':'se','Suécia':'se','Suecia':'se',
+  'Switzerland':'ch','Suíça':'ch','Suica':'ch','Tunisia':'tn',
+  'Tunísia':'tn','Türkiye':'tr','Turkey':'tr','Turquia':'tr',
+  'United States':'us','Estados Unidos':'us','USA':'us',
+  'Uruguay':'uy','Uruguai':'uy','Uzbekistan':'uz',
+  'Uzbequistão':'uz','Uzbequistao':'uz',
+  "Côte d'Ivoire":'ci','Costa do Marfim':'ci','Ivory Coast':'ci',
+  'Cameroon':'cm','Cameroun':'cm','Nigeria':'ng','Nigéria':'ng',
+  'Algeria':'dz','Comoros':'km','Comores':'km','Jamaica':'jm',
+  'Honduras':'hn','Costa Rica':'cr','El Salvador':'sv',
+  'Venezuela':'ve','Bolivia':'bo','Chile':'cl','Peru':'pe',
+  'Serbia':'rs','Sérvia':'rs','Ukraine':'ua','Ucrânia':'ua',
+  'Poland':'pl','Polônia':'pl','Romania':'ro','Georgia':'ge',
+  'Slovakia':'sk','Eslováquia':'sk','Slovenia':'si',
+  'Albania':'al','Albânia':'al','Denmark':'dk','Dinamarca':'dk',
+  'Italy':'it','Itália':'it','Belgium':'be','Bélgica':'be',
+  'Indonesia':'id','Indonésia':'id','Bahrain':'bh','Oman':'om',
+  'Fiji':'fj','Tanzania':'tz','Angola':'ao','Uganda':'ug','Mali':'ml'
+};const COPA_TEAMS=[
+  'Argentina','Australia','Austria','Belgium','Bosnia and Herzegovina',
+  'Brazil','Canada','Cape Verde','Colombia','Croatia','Curaçao',
+  'Czech Republic','DR Congo','Ecuador','Egypt','England','France',
+  'Germany','Ghana','Haiti','Iran','Iraq','Japan','Jordan','Mexico',
+  'Morocco','Netherlands','New Zealand','Norway','Panama','Paraguay',
+  'Portugal','Qatar','Saudi Arabia','Scotland','Senegal','South Africa',
+  'South Korea','Spain','Sweden','Switzerland','Tunisia','Türkiye',
+  'United States','Uruguay','Uzbekistan',"Côte d'Ivoire"
+].sort((a,b)=>a.localeCompare(b,'pt'));<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -298,15 +347,18 @@ input[type=datetime-local]{color-scheme:dark}
               <select id="pred-runnerup" class="qsel" style="margin-top:0"><option value="">— escolha o vice —</option></select>
             </div>
           </div>
-          <button class="save-btn" style="margin-top:0" onclick="saveFinalPred()">Salvar palpite dos finalistas</button>
+          <button class="save-btn" style="margin-top:0" onclick="saveFinalPred()">Confirmar palpite dos finalistas</button>
         </div>
         <div id="final-pred-saved" style="display:none;margin-top:10px">
           <div style="background:rgba(0,214,126,.08);border:1px solid rgba(0,214,126,.25);border-radius:8px;padding:10px 14px;font-size:13px">
             <p style="color:var(--green);font-weight:700;margin-bottom:4px">&#10003; Palpite salvo</p>
             <p style="color:var(--muted)">Campeão: <strong id="saved-champ" style="color:var(--text)"></strong> &nbsp;·&nbsp; Vice: <strong id="saved-runner" style="color:var(--text)"></strong></p>
-            <button class="btn-link" style="margin-top:8px;display:block;font-size:12px" onclick="editFinalPred()">&#9999;&#65039; Alterar palpite</button>
+            <span id="saved-edit-btn" style="display:none"></span>
           </div>
         </div>
+      </div>
+      <div id="nav-gate-msg" style="background:rgba(245,197,24,.08);border:1px solid rgba(245,197,24,.25);border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:var(--gold);text-align:center">
+        &#9888;&#65039; Faça seu palpite dos finalistas acima para liberar as outras seções do bolão.
       </div>
       <div class="rc">
         <div class="rh">&#128203; Regras Rápidas</div>
@@ -683,6 +735,7 @@ function enterApp(){
   document.getElementById('wc-title').textContent='Olá, '+name.split(' ')[0]+'! 🎯';
   setupListeners();
   goPage('inicio');
+  // gate is applied in renderInicio via updateNavGate
 }
 
 // ══ REALTIME LISTENERS ═══════════════════════════════
@@ -707,6 +760,7 @@ function setupListeners(){
   db.ref('finalPreds').on('value',snap=>{
     _finalPreds=snap.val()||{};
     if(currentPage==='inicio')renderInicio();
+    else updateNavGate();
     if(currentPage==='ranking')renderRanking();
   });
   db.ref('finalResult').on('value',snap=>{
@@ -763,36 +817,91 @@ function populateTeamSelects(){
 function renderInicio(){
   populateTeamSelects();
   const fp=_finalPreds[currentUser?.uid];
-  const locked=!!_finalResult?.locked;
-  document.getElementById('final-locked-msg').style.display=locked?'':'none';
-  document.getElementById('final-pred-form').style.display=locked?'none':'';
-  if(fp?.champion){
-    const cs=document.getElementById('pred-champion');const rs=document.getElementById('pred-runnerup');
-    if(cs)cs.value=fp.champion;if(rs)rs.value=fp.runnerUp||'';
+  const adminLocked=!!_finalResult?.locked;
+  const userLocked=!!(fp?.champion && fp?.locked);   // user already confirmed
+  const hasPred=!!(fp?.champion && fp?.runnerUp);
+
+  // Admin lock banner
+  document.getElementById('final-locked-msg').style.display=(adminLocked&&!hasPred)?'':'none';
+
+  if(userLocked){
+    // Permanently confirmed — show result only, no form, no edit
+    document.getElementById('final-pred-form').style.display='none';
     document.getElementById('saved-champ').textContent=fp.champion;
     document.getElementById('saved-runner').textContent=fp.runnerUp||'—';
+    document.getElementById('saved-edit-btn').style.display='none';  // hide edit
     document.getElementById('final-pred-saved').style.display='';
-  }else{document.getElementById('final-pred-saved').style.display='none';}
+  } else if(adminLocked){
+    document.getElementById('final-pred-form').style.display='none';
+    if(hasPred){
+      document.getElementById('saved-champ').textContent=fp.champion;
+      document.getElementById('saved-runner').textContent=fp.runnerUp||'—';
+      document.getElementById('saved-edit-btn').style.display='none';
+      document.getElementById('final-pred-saved').style.display='';
+    } else {
+      document.getElementById('final-pred-saved').style.display='none';
+    }
+  } else {
+    // Open — show form if not yet confirmed
+    document.getElementById('final-pred-form').style.display='';
+    if(hasPred){
+      const cs=document.getElementById('pred-champion');
+      const rs=document.getElementById('pred-runnerup');
+      if(cs)cs.value=fp.champion; if(rs)rs.value=fp.runnerUp||'';
+      document.getElementById('saved-champ').textContent=fp.champion;
+      document.getElementById('saved-runner').textContent=fp.runnerUp||'—';
+      document.getElementById('saved-edit-btn').style.display='none'; // no edit even before admin lock
+      document.getElementById('final-pred-saved').style.display='';
+    } else {
+      document.getElementById('final-pred-saved').style.display='none';
+    }
+  }
+
+  updateNavGate();
 }
 
-function editFinalPred(){document.getElementById('final-pred-saved').style.display='none';}
+function updateNavGate(){
+  const fp=_finalPreds[currentUser?.uid];
+  const hasPred=!!(fp?.champion && fp?.runnerUp);
+  ['jogos','ranking','grupos','regras','admin'].forEach(p=>{
+    const nb=document.getElementById('nb-'+p);
+    if(!nb)return;
+    if(p==='admin' && !hasPred){ nb.style.display='none'; return; }
+    nb.style.opacity=hasPred?'1':'0.35';
+    nb.style.pointerEvents=hasPred?'':'none';
+    nb.title=hasPred?'':'Faça seu palpite dos finalistas primeiro';
+  });
+  if(!hasPred && currentPage!=='inicio') goPage('inicio');
+  const gm=document.getElementById('nav-gate-msg');
+  if(gm)gm.style.display=hasPred?'none':'';
+}
+
+function editFinalPred(){/* desabilitado — palpite não pode ser alterado */}
 
 async function saveFinalPred(){
   const champ=document.getElementById('pred-champion')?.value;
   const runner=document.getElementById('pred-runnerup')?.value;
-  if(!champ||!runner){toast('Escolha o campeão e o vice!','t-err');return;}
+  if(!champ||!runner){toast('Escolha o campeão e o vice-campeão!','t-err');return;}
   if(champ===runner){toast('Campeão e vice não podem ser o mesmo time!','t-err');return;}
+  // Confirm before locking permanently
+  if(!confirm('Atenção: após confirmar, seu palpite dos finalistas não poderá ser alterado.\n\nCampeão: '+champ+'\nVice: '+runner+'\n\nConfirmar?'))return;
   const btn=document.querySelector('#final-pred-form .save-btn');
-  if(btn){btn.disabled=true;btn.textContent='Salvando...';}
+  if(btn){btn.disabled=true;btn.textContent='Confirmando...';}
   try{
-    await db.ref('finalPreds/'+currentUser.uid).set({champion:champ,runnerUp:runner,savedAt:Date.now()});
-    _finalPreds[currentUser.uid]={champion:champ,runnerUp:runner};
+    const pred={champion:champ,runnerUp:runner,locked:true,savedAt:Date.now()};
+    await db.ref('finalPreds/'+currentUser.uid).set(pred);
+    _finalPreds[currentUser.uid]=pred;
     document.getElementById('saved-champ').textContent=champ;
     document.getElementById('saved-runner').textContent=runner;
+    document.getElementById('saved-edit-btn').style.display='none';
     document.getElementById('final-pred-saved').style.display='';
-    toast('Palpite dos finalistas salvo! ✓');
-  }catch(e){toast('Erro: '+e.message,'t-err');}
-  finally{if(btn){btn.disabled=false;btn.textContent='Salvar palpite dos finalistas';}}
+    document.getElementById('final-pred-form').style.display='none';
+    toast('Palpite confirmado e bloqueado! ✓');
+    updateNavGate();
+  }catch(e){
+    toast('Erro: '+e.message,'t-err');
+    if(btn){btn.disabled=false;btn.textContent='Confirmar palpite dos finalistas';}
+  }
 }
 
 function calcFinalBonus(uid){
