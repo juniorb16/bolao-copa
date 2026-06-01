@@ -173,6 +173,26 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .t-ok{background:var(--green);color:#fff}
 .t-err{background:var(--red);color:#fff}
 .t-info{background:var(--bg4);color:var(--text);border:1px solid var(--border)}
+.gt{background:var(--bg2);border:1px solid var(--border);border-radius:12px;margin-bottom:16px;overflow:hidden}
+.gt-head{background:linear-gradient(135deg,rgba(0,214,126,.12),rgba(58,155,213,.08));padding:10px 16px;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;color:var(--gold);display:flex;align-items:center;gap:8px}
+.gt table{width:100%;border-collapse:collapse}
+.gt th{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:7px 8px;border-bottom:1px solid var(--border);text-align:center}
+.gt th:nth-child(2){text-align:left;padding-left:12px}
+.gt td{padding:9px 8px;border-bottom:1px solid var(--border);font-size:13px;text-align:center;vertical-align:middle}
+.gt tbody tr:last-child td{border-bottom:none}
+.gt tbody tr.q1 td{background:rgba(0,214,126,.06)}
+.gt tbody tr.q1 td:first-child{border-left:3px solid var(--green)}
+.gt tbody tr.q2 td{background:rgba(0,214,126,.03)}
+.gt tbody tr.q2 td:first-child{border-left:3px solid rgba(0,214,126,.4)}
+.gt tbody tr.q3 td{background:rgba(245,197,24,.03)}
+.gt tbody tr.q3 td:first-child{border-left:3px solid rgba(245,197,24,.35)}
+.gt td:nth-child(2){text-align:left;padding-left:4px}
+.gt-team-cell{display:flex;align-items:center;gap:8px}
+.gt-pts{font-family:'Bebas Neue',sans-serif;font-size:17px;color:var(--green);font-weight:700}
+.gt-legend{display:flex;gap:16px;padding:7px 16px 8px;font-size:11px;color:var(--muted)}
+.gt-legend span{display:flex;align-items:center;gap:5px}
+.gt-legend i{width:3px;height:14px;border-radius:1px;display:inline-block}
+.flag-img{width:46px;height:30px;object-fit:cover;border-radius:3px;display:block;margin:0 auto;box-shadow:0 1px 3px rgba(0,0,0,.35)}
 input[type=datetime-local]{color-scheme:dark}
 @media(max-width:480px){.fg{grid-template-columns:1fr}.pts-strip{grid-template-columns:1fr}.h-name{display:none}}
 </style>
@@ -243,7 +263,9 @@ input[type=datetime-local]{color-scheme:dark}
   <nav class="nav">
     <button class="nb on" id="nb-inicio" onclick="goPage('inicio')">&#127968; Início</button>
     <button class="nb" id="nb-jogos" onclick="goPage('jogos')">&#9917; Jogos</button>
+    <button class="nb" id="nb-grupos" onclick="goPage('grupos')">&#128202; Grupos</button>
     <button class="nb" id="nb-ranking" onclick="goPage('ranking')">&#127942; Ranking</button>
+    <button class="nb" id="nb-grupos" onclick="goPage('grupos')">&#128202; Grupos</button>
     <button class="nb" id="nb-regras" onclick="goPage('regras')">&#128203; Regras</button>
     <button class="nb" id="nb-admin" onclick="checkAdmin()" style="display:none">&#9881;&#65039; Admin</button>
   </nav>
@@ -301,6 +323,20 @@ input[type=datetime-local]{color-scheme:dark}
       <div id="matches-container"><div class="spinner"></div></div>
     </div>
 
+    <div id="page-grupos" class="pg">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+        <div>
+          <p style="font-size:18px;font-weight:700;color:var(--text)">&#128202; Tabela de Grupos</p>
+          <p style="font-size:12px;color:var(--muted);margin-top:3px">Atualiza automaticamente conforme os resultados são lançados</p>
+        </div>
+        <div style="display:flex;gap:10px;font-size:11px">
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:var(--green);display:inline-block"></span>Classificado</span>
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:var(--gold);display:inline-block"></span>Playoff 3&#186;</span>
+        </div>
+      </div>
+      <div id="grupos-container"><div class="spinner"></div></div>
+    </div>
+
     <div id="page-ranking" class="pg">
       <div class="pts-strip">
         <div class="pts-box"><div class="pv">3</div><div class="pl">Placar exato</div></div>
@@ -311,6 +347,13 @@ input[type=datetime-local]{color-scheme:dark}
         &#127942; Palpite dos finalistas: <strong>+60 pts</strong> (acertar os 2) · <strong>+40 pts</strong> (acertar 1)
       </div>
       <div id="ranking-container"><div class="spinner"></div></div>
+    </div>
+
+    <div id="page-grupos" class="pg">
+      <div style="background:rgba(245,197,24,.07);border:1px solid rgba(245,197,24,.2);border-radius:10px;padding:11px 16px;margin-bottom:16px;font-size:12px;color:var(--gold)">
+        &#128202; Tabela atualizada automaticamente após cada jogo. Top 2 de cada grupo + 8 melhores 3&#186;s avançam para as oitavas.
+      </div>
+      <div id="grupos-container"><div class="spinner"></div></div>
     </div>
 
     <div id="page-regras" class="pg">
@@ -451,7 +494,7 @@ const ADMIN_HASH = 'db6f20ac0787ad306f4df4efbe6e21586b7dfeea039582cd67a9fb4a4a8c
 let auth, db, currentUser=null, userProfile=null, isAdminSession=false;
 let _matches={}, _preds={}, _users={}, _finalPreds={}, _finalResult={};
 let currentPage='inicio';
-const PAGES=['inicio','jogos','ranking','regras','admin'];
+const PAGES=['inicio','jogos','grupos','ranking','regras','admin'];
 
 // ══ TEAMS ═══════════════════════════════════════════
 const COPA_TEAMS=[
@@ -469,6 +512,64 @@ const COPA_TEAMS=[
 // ══ FLAGS ═══════════════════════════════════════════
 const FLAGS={'Brazil':'🇧🇷','Brasil':'🇧🇷','Argentina':'🇦🇷','Colombia':'🇨🇴','Colômbia':'🇨🇴','Ecuador':'🇪🇨','Equador':'🇪🇨','Uruguay':'🇺🇾','Uruguai':'🇺🇾','Venezuela':'🇻🇪','Mexico':'🇲🇽','México':'🇲🇽','United States':'🇺🇸','Estados Unidos':'🇺🇸','USA':'🇺🇸','Canada':'🇨🇦','Canadá':'🇨🇦','Jamaica':'🇯🇲','Honduras':'🇭🇳','Panama':'🇵🇦','Panamá':'🇵🇦','France':'🇫🇷','Franca':'🇫🇷','França':'🇫🇷','Germany':'🇩🇪','Alemanha':'🇩🇪','Spain':'🇪🇸','Espanha':'🇪🇸','England':'🏴󠁧󠁢󠁥󠁮󠁧󠁿','Inglaterra':'🏴󠁧󠁢󠁥󠁮󠁧󠁿','Portugal':'🇵🇹','Netherlands':'🇳🇱','Paises Baixos':'🇳🇱','Belgium':'🇧🇪','Belgica':'🇧🇪','Bélgica':'🇧🇪','Italy':'🇮🇹','Italia':'🇮🇹','Itália':'🇮🇹','Croatia':'🇭🇷','Croacia':'🇭🇷','Croácia':'🇭🇷','Switzerland':'🇨🇭','Suica':'🇨🇭','Suíça':'🇨🇭','Denmark':'🇩🇰','Dinamarca':'🇩🇰','Turkey':'🇹🇷','Turquia':'🇹🇷','Austria':'🇦🇹','Austria':'🇦🇹','Áustria':'🇦🇹','Scotland':'🏴󠁧󠁢󠁳󠁣󠁴󠁿','Escocia':'🏴󠁧󠁢󠁳󠁣󠁴󠁿','Escócia':'🏴󠁧󠁢󠁳󠁣󠁴󠁿','Serbia':'🇷🇸','Sérvia':'🇷🇸','Ukraine':'🇺🇦','Ucrania':'🇺🇦','Ucrânia':'🇺🇦','Poland':'🇵🇱','Polonia':'🇵🇱','Polônia':'🇵🇱','Romania':'🇷🇴','Georgia':'🇬🇪','Slovakia':'🇸🇰','Eslovaquia':'🇸🇰','Eslováquia':'🇸🇰','Slovenia':'🇸🇮','Eslovenia':'🇸🇮','Eslovênia':'🇸🇮','Morocco':'🇲🇦','Marrocos':'🇲🇦','Senegal':'🇸🇳','Nigeria':'🇳🇬','Nigéria':'🇳🇬','Cameroon':'🇨🇲','Cameroun':'🇨🇲','Egypt':'🇪🇬','Egipto':'🇪🇬','Egito':'🇪🇬','Ghana':'🇬🇭','Gana':'🇬🇭','Tunisia':'🇹🇳','Tunísia':'🇹🇳','DR Congo':'🇨🇩','Congo':'🇨🇩','Ivory Coast':'🇨🇮','Costa do Marfim':'🇨🇮',"Côte d'Ivoire":'🇨🇮','Algeria':'🇩🇿','Algeria':'🇩🇿','South Africa':'🇿🇦','África do Sul':'🇿🇦','Comores':'🇰🇲','Cabo Verde':'🇨🇻','Japan':'🇯🇵','Japao':'🇯🇵','Japão':'🇯🇵','South Korea':'🇰🇷','Coreia do Sul':'🇰🇷','Australia':'🇦🇺','Austrália':'🇦🇺','Iran':'🇮🇷','Ira':'🇮🇷','Irã':'🇮🇷','Saudi Arabia':'🇸🇦','Arabia Saudita':'🇸🇦','Arábia Saudita':'🇸🇦','Iraq':'🇮🇶','Iraque':'🇮🇶','Uzbekistan':'🇺🇿','Uzbequistao':'🇺🇿','Uzbequistão':'🇺🇿','Jordan':'🇯🇴','Jordania':'🇯🇴','Jordânia':'🇯🇴','Indonesia':'🇮🇩','Indonésia':'🇮🇩','New Zealand':'🇳🇿','Nova Zelandia':'🇳🇿','Nova Zelândia':'🇳🇿'};
 const flag=n=>FLAGS[n]||'🏳️';
+
+const ISO2={'Mexico':'mx','México':'mx','United States':'us','USA':'us','Canada':'ca','Jamaica':'jm','Honduras':'hn','Panama':'pa','Panamá':'pa','Costa Rica':'cr','El Salvador':'sv','Trinidad and Tobago':'tt','Guatemala':'gt','Cuba':'cu','Suriname':'sr','Brazil':'br','Brasil':'br','Argentina':'ar','Colombia':'co','Colômbia':'co','Ecuador':'ec','Equador':'ec','Uruguay':'uy','Uruguai':'uy','Venezuela':'ve','Chile':'cl','Peru':'pe','Paraguay':'py','Bolivia':'bo','France':'fr','Franca':'fr','França':'fr','Germany':'de','Alemanha':'de','Spain':'es','Espanha':'es','England':'gb-eng','Inglaterra':'gb-eng','Portugal':'pt','Netherlands':'nl','Paises Baixos':'nl','Belgium':'be','Belgica':'be','Bélgica':'be','Italy':'it','Italia':'it','Itália':'it','Croatia':'hr','Croacia':'hr','Croácia':'hr','Switzerland':'ch','Suica':'ch','Suíça':'ch','Denmark':'dk','Dinamarca':'dk','Turkey':'tr','Turquia':'tr','Austria':'at','Áustria':'at','Scotland':'gb-sct','Escocia':'gb-sct','Escócia':'gb-sct','Serbia':'rs','Sérvia':'rs','Ukraine':'ua','Ucrania':'ua','Ucrânia':'ua','Poland':'pl','Polonia':'pl','Polônia':'pl','Romania':'ro','Romênia':'ro','Georgia':'ge','Geórgia':'ge','Slovakia':'sk','Eslováquia':'sk','Slovenia':'si','Eslovênia':'si','Albania':'al','Albânia':'al','Wales':'gb-wls','Sweden':'se','Norway':'no','Czech Republic':'cz','Greece':'gr','Hungary':'hu','Finland':'fi','Iceland':'is','Morocco':'ma','Marrocos':'ma','Senegal':'sn','Nigeria':'ng','Nigéria':'ng','Cameroon':'cm','Cameroun':'cm','Egypt':'eg','Egipto':'eg','Egito':'eg','Ghana':'gh','Gana':'gh','Tunisia':'tn','Tunísia':'tn','DR Congo':'cd','Congo':'cd','Ivory Coast':'ci','Costa do Marfim':'ci',"Côte d'Ivoire":'ci','Algeria':'dz','Argélia':'dz','South Africa':'za','África do Sul':'za','Africa do Sul':'za','Comoros':'km','Comores':'km','Cape Verde':'cv','Cabo Verde':'cv','Mali':'ml','Mozambique':'mz','Tanzania':'tz','Angola':'ao','Zambia':'zm','Japan':'jp','Japao':'jp','Japão':'jp','South Korea':'kr','Coreia do Sul':'kr','Australia':'au','Austrália':'au','Iran':'ir','Ira':'ir','Irã':'ir','Saudi Arabia':'sa','Arabia Saudita':'sa','Arábia Saudita':'sa','Iraq':'iq','Iraque':'iq','Uzbekistan':'uz','Uzbequistao':'uz','Uzbequistão':'uz','Jordan':'jo','Jordania':'jo','Jordânia':'jo','China PR':'cn','Indonesia':'id','Indonésia':'id','New Zealand':'nz','Nova Zelandia':'nz','Nova Zelândia':'nz','Fiji':'fj','Qatar':'qa','Bahrain':'bh','Oman':'om'};
+
+.png" alt="${name}" style="width:${s}px;height:${h}px;object-fit:cover;border-radius:4px;display:block;margin:0 auto" loading="lazy" onerror="this.outerHTML='<span style=font-size:28px;line-height:1>${emoji}</span>'"/>`;
+  return`<span style="font-size:28px;line-height:1">${emoji}</span>`;
+}
+
+// ── COUNTRY CODES for flagcdn.com ────────────────────────────────────────────
+const CC={'Argentina':'ar','Brasil':'br','Brazil':'br','Colombia':'co','Colômbia':'co','Ecuador':'ec','Equador':'ec','Uruguay':'uy','Uruguai':'uy','Venezuela':'ve','Mexico':'mx','México':'mx','United States':'us','Estados Unidos':'us','USA':'us','Canada':'ca','Canadá':'ca','Jamaica':'jm','Honduras':'hn','Panama':'pa','Panamá':'pa','Costa Rica':'cr','El Salvador':'sv','Trinidad and Tobago':'tt','Guatemala':'gt','Cuba':'cu','Suriname':'sr','France':'fr','França':'fr','Franca':'fr','Germany':'de','Alemanha':'de','Spain':'es','Espanha':'es','England':'gb-eng','Inglaterra':'gb-eng','Portugal':'pt','Netherlands':'nl','Países Baixos':'nl','Paises Baixos':'nl','Belgium':'be','Bélgica':'be','Belgica':'be','Italy':'it','Itália':'it','Italia':'it','Croatia':'hr','Croácia':'hr','Croacia':'hr','Switzerland':'ch','Suíça':'ch','Suica':'ch','Denmark':'dk','Dinamarca':'dk','Turkey':'tr','Turquia':'tr','Austria':'at','Áustria':'at','Scotland':'gb-sct','Escócia':'gb-sct','Escocia':'gb-sct','Serbia':'rs','Sérvia':'rs','Ukraine':'ua','Ucrânia':'ua','Ucrania':'ua','Poland':'pl','Polônia':'pl','Polonia':'pl','Romania':'ro','Romênia':'ro','Georgia':'ge','Slovakia':'sk','Eslováquia':'sk','Eslovaquia':'sk','Slovenia':'si','Eslovênia':'si','Eslovenia':'si','Albania':'al','Albânia':'al','Iceland':'is','Norway':'no','Sweden':'se','Finland':'fi','Morocco':'ma','Marrocos':'ma','Senegal':'sn','Nigeria':'ng','Nigéria':'ng','Cameroon':'cm','Cameroun':'cm','Egypt':'eg','Egito':'eg','Egipto':'eg','Ghana':'gh','Tunisia':'tn','Tunísia':'tn','DR Congo':'cd','Congo':'cd',"Côte d'Ivoire":'ci','Ivory Coast':'ci','Costa do Marfim':'ci','Algeria':'dz','Algéria':'dz','South Africa':'za','África do Sul':'za','Comoros':'km','Comores':'km','Cape Verde':'cv','Cabo Verde':'cv','Tanzania':'tz','Mozambique':'mz','Angola':'ao','Zambia':'zm','Uganda':'ug','Mali':'ml','Japan':'jp','Japão':'jp','Japao':'jp','South Korea':'kr','Coreia do Sul':'kr','Australia':'au','Austrália':'au','Iran':'ir','Irã':'ir','Ira':'ir','Saudi Arabia':'sa','Arábia Saudita':'sa','Arabia Saudita':'sa','Iraq':'iq','Iraque':'iq','Uzbekistan':'uz','Uzbequistão':'uz','Uzbequistao':'uz','Jordan':'jo','Jordânia':'jo','Jordania':'jo','Indonesia':'id','Indonésia':'id','New Zealand':'nz','Nova Zelândia':'nz','Nova Zelandia':'nz','Czech Republic':'cz','República Tcheca':'cz','China PR':'cn','China':'cn','Bahrain':'bh','Oman':'om','Fiji':'fj','Thailand':'th'};
+
+function teamFlagImg(name){
+  const cc=CC[name];
+  const url=cc?`https://flagcdn.com/w80/${cc}.png`:'';
+  if(!url)return`<span style="font-size:28px;display:block;text-align:center">${flag(name)}</span>`;
+  return`<img src="${url}" alt="${name}" class="flag-img" style="width:${w}px" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'${flag(name)}',style:'font-size:26px;display:block;text-align:center'}))">`;
+}
+
+// ── GROUP STANDINGS ───────────────────────────────────────────────────────────
+function calcGroupStandings(){
+  const groups={};
+  const ms=Object.values(_matches).filter(m=>m.type==='grupo'&&m.phase&&m.phase.startsWith('Grupo'));
+  ms.forEach(m=>{
+    const g=m.phase;
+    if(!groups[g])groups[g]={};
+    [m.t1,m.t2].forEach((t,ti)=>{if(!groups[g][t])groups[g][t]={name:t,f1:ti===0?m.f1:m.f2,mp:0,w:0,d:0,l:0,gf:0,ga:0,pts:0};});
+    if(m.r1!=null&&m.r2!=null){
+      const t1=groups[g][m.t1],t2=groups[g][m.t2];
+      t1.mp++;t2.mp++;t1.gf+=m.r1;t1.ga+=m.r2;t2.gf+=m.r2;t2.ga+=m.r1;
+      if(m.r1>m.r2){t1.w++;t1.pts+=3;t2.l++;}
+      else if(m.r1<m.r2){t2.w++;t2.pts+=3;t1.l++;}
+      else{t1.d++;t1.pts++;t2.d++;t2.pts++;}
+    }
+  });
+  return groups;
+}
+
+function renderGrupos(){
+  const groups=calcGroupStandings();
+  const c=document.getElementById('grupos-container');
+  const keys=Object.keys(groups).sort();
+  if(!keys.length){
+    c.innerHTML='<div class="empty"><div class="empty-ico">📊</div><p>Nenhum jogo de grupo importado ainda.</p></div>';
+    return;
+  }
+  c.innerHTML=keys.map(g=>{
+    const teams=Object.values(groups[g]).sort((a,b)=>b.pts-a.pts||(b.gf-b.ga)-(a.gf-a.ga)||b.gf-a.gf||a.name.localeCompare(b.name));
+    const rows=teams.map((t,i)=>{
+      const gd=t.gf-t.ga;
+      const cls=i===0?'q1':i===1?'q2':i===2?'q3':'';
+      const flagHtml=teamFlagImg(t.name);
+      return`<tr class="${cls}"><td>${i+1}</td><td>${flagHtml}<span>${t.name}</span></td><td>${t.mp}</td><td>${t.w}</td><td>${t.d}</td><td>${t.l}</td><td>${t.gf}</td><td>${t.ga}</td><td>${gd>0?'+'+gd:gd}</td><td class="gt-pts">${t.pts}</td></tr>`;
+    }).join('');
+    return`<div class="gt"><div class="gt-head">&#128202; ${g}</div>
+      <table><thead><tr><th>#</th><th style="text-align:left;padding-left:8px">Seleção</th><th>J</th><th>V</th><th>E</th><th>D</th><th>GP</th><th>GC</th><th>SG</th><th>Pts</th></tr></thead><tbody>${rows}</tbody></table>
+      <div class="gt-legend"><span><i style="background:var(--green)"></i> Classificado</span><span><i style="background:rgba(245,197,24,.5)"></i> Possível 3&#186;</span></div>
+    </div>`;
+  }).join('');
+}
 
 const STAGE_MAP={'GROUP_STAGE':g=>'Grupo '+(g||'').replace('GROUP_',''),'ROUND_OF_32':()=>'32 avos de Final','LAST_32':()=>'32 avos de Final','ROUND_OF_16':()=>'Oitavas de Final','LAST_16':()=>'Oitavas de Final','QUARTER_FINALS':()=>'Quartas de Final','SEMI_FINALS':()=>'Semifinal','THIRD_PLACE':()=>'3º Lugar','FINAL':()=>'Final'};
 const stageLabel=(s,g)=>STAGE_MAP[s]?STAGE_MAP[s](g):(s||'Copa 2026');
@@ -593,6 +694,7 @@ function setupListeners(){
   db.ref('matches').on('value',snap=>{
     _matches=snap.val()||{};
     if(currentPage==='jogos')renderMatches();
+    if(currentPage==='grupos')renderGrupos();
     if(currentPage==='ranking')renderRanking();
     if(currentPage==='admin'&&isAdminSession)renderAdminMatches();
   });
@@ -629,6 +731,7 @@ function goPage(id){
   currentPage=id;
   if(id==='inicio')renderInicio();
   if(id==='jogos')renderMatches();
+  if(id==='grupos')renderGrupos();
   if(id==='ranking')renderRanking();
   if(id==='admin')renderAdmin();
 }
@@ -646,10 +749,18 @@ async function sha256(str){const buf=await crypto.subtle.digest('SHA-256',new Te
 
 // ══ FINALISTS ════════════════════════════════════════
 function populateTeamSelects(){
-  const opts='<option value="">— escolha —</option>'+COPA_TEAMS.map(t=>`<option value="${t}">${t}</option>`).join('');
-  ['pred-champion','pred-runnerup','actual-champion','actual-runnerup'].forEach(id=>{
+  // Usa os times reais importados; fallback para COPA_TEAMS se ainda não importou
+  const fromMatches=Array.from(new Set(
+    Object.values(_matches).flatMap(m=>[m.t1,m.t2]).filter(t=>t&&t!=='A definir')
+  )).sort((a,b)=>a.localeCompare(b,'pt'));
+  const teams=fromMatches.length?fromMatches:COPA_TEAMS;
+  const placeholders={'pred-champion':'— escolha o campeão —','pred-runnerup':'— escolha o vice —','actual-champion':'— campeão real —','actual-runnerup':'— vice real —'};
+  Object.entries(placeholders).forEach(([id,ph])=>{
     const el=document.getElementById(id);
-    if(el){const first=el.options[0]?.text||'— escolha —';el.innerHTML=opts.replace('— escolha —',first);}
+    if(!el)return;
+    const cur=el.value;
+    el.innerHTML=`<option value="">${ph}</option>`+teams.map(t=>`<option value="${t}">${t}</option>`).join('');
+    if(cur)el.value=cur;
   });
 }
 
@@ -779,7 +890,7 @@ function buildCard(m){
     if(m.type==='elim'){const qv=pred?.clf||'';qs=`<select class="qsel" id="q_${m.id}"><option value="">🏆 Quem classifica?</option><option value="${m.t1}" ${qv===m.t1?'selected':''}>${m.t1}</option><option value="${m.t2}" ${qv===m.t2?'selected':''}>${m.t2}</option></select>`;}
     center=`<div class="sinputs"><input class="si" type="number" id="s1_${m.id}" min="0" max="20" placeholder="0" value="${s1}"/><span class="si-sep">×</span><input class="si" type="number" id="s2_${m.id}" min="0" max="20" placeholder="0" value="${s2}"/></div>${qs}<button class="save-btn" id="btn_${m.id}" onclick="savePred('${m.id}')">Salvar palpite</button>`;
   }
-  return `<div class="${cls}"><div class="mc-top"><div style="display:flex;align-items:center;flex-wrap:wrap;gap:5px">${metaL}${ptsB}</div>${metaR}</div><div class="mc-teams"><div class="team"><div class="team-flag">${m.f1}</div><div class="team-name">${m.t1}</div></div><div class="vs">${center}</div><div class="team"><div class="team-flag">${m.f2}</div><div class="team-name">${m.t2}</div></div></div></div>`;
+  return `<div class="${cls}"><div class="mc-top"><div style="display:flex;align-items:center;flex-wrap:wrap;gap:5px">${metaL}${ptsB}</div>${metaR}</div><div class="mc-teams"><div class="team">${teamFlagImg(m.t1)}<div class="team-name">${m.t1}</div></div><div class="vs">${center}</div><div class="team">${teamFlagImg(m.t2)}<div class="team-name">${m.t2}</div></div></div></div>`;
 }
 
 async function savePred(mid){
