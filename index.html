@@ -536,7 +536,7 @@ const CC={
   'Australia':'au',"Austrália":'au',
   'Austria':'at',"Áustria":'at',
   'Belgium':'be',"Bélgica":'be','Belgica':'be',
-  'Bosnia and Herzegovina':'ba','Bosnia':'ba','Bósnia':'ba',
+  'Bosnia and Herzegovina':'ba','Bosnia':'ba','Bósnia':'ba','Bosnia-Herzegovina':'ba','Bosnia & Herzegovina':'ba','Bosnia-Hercegovina':'ba',
   'Brazil':'br','Brasil':'br',
   'Canada':'ca',"Canadá":'ca',
   'Cape Verde':'cv','Cabo Verde':'cv',
@@ -653,11 +653,19 @@ const TEAM_NORM={
   'United States of America':'United States','USA':'United States',
   'Turkey':'Türkiye','Turkiye':'Türkiye',
   "Cote d'Ivoire":"Côte d'Ivoire","Ivory Coast":"Côte d'Ivoire",
+  "Côte D'Ivoire":"Côte d'Ivoire",
   'Czech Republic':'Czech Republic','Czechia':'Czech Republic',
   'Korea Republic':'South Korea','Republic of Korea':'South Korea',
   'Bosnia-Herzegovina':'Bosnia and Herzegovina',
+  'Bosnia-Hercegovina':'Bosnia and Herzegovina',
+  'Bosnia & Herzegovina':'Bosnia and Herzegovina',
+  'Bosnia and Herz.':'Bosnia and Herzegovina',
   'Congo DR':'DR Congo','Democratic Republic of Congo':'DR Congo',
-  'Cape Verde Islands':'Cape Verde'
+  'D.R. Congo':'DR Congo','Rep. Dem. Congo':'DR Congo',
+  'Cape Verde Islands':'Cape Verde','Cabo Verde':'Cape Verde',
+  'Iran IR':'Iran','Korea DPR':'North Korea',
+  'Curaçao':'Curaçao','Curacao':'Curaçao',
+  'Türkiye':'Türkiye'
 };
 function normTeam(n){ return TEAM_NORM[n]||n||'A definir'; }
 
@@ -907,14 +915,17 @@ function renderInicio(){
 function updateNavGate(){
   const fp=_finalPreds[currentUser?.uid];
   const hasPred=!!(fp?.champion && fp?.runnerUp);
-  ['jogos','ranking','grupos','regras','admin'].forEach(p=>{
+  // Gate regular tabs
+  ['jogos','ranking','grupos','regras'].forEach(p=>{
     const nb=document.getElementById('nb-'+p);
     if(!nb)return;
-    if(p==='admin' && !hasPred){ nb.style.display='none'; return; }
     nb.style.opacity=hasPred?'1':'0.35';
     nb.style.pointerEvents=hasPred?'':'none';
     nb.title=hasPred?'':'Faça seu palpite dos finalistas primeiro';
   });
+  // Admin button: visible when hasPred (auth happens on click)
+  const nbAdmin=document.getElementById('nb-admin');
+  if(nbAdmin) nbAdmin.style.display=hasPred?'block':'none';
   if(!hasPred && currentPage!=='inicio') goPage('inicio');
   const gm=document.getElementById('nav-gate-msg');
   if(gm)gm.style.display=hasPred?'none':'';
