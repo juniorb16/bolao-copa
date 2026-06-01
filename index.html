@@ -530,26 +530,80 @@ const ISO2={'Mexico':'mx','México':'mx','United States':'us','USA':'us','Canada
 
 // ── COUNTRY CODES for flagcdn.com ────────────────────────────────────────────
 const CC={
-  'Argentina':'ar','Australia':'au','Austria':'at','Belgium':'be',
-  'Bosnia and Herzegovina':'ba','Brazil':'br','Canada':'ca',
-  'Cape Verde':'cv',"Curaçao":'cw','Colombia':'co','Croatia':'hr',
-  'Czech Republic':'cz','DR Congo':'cd','Ecuador':'ec','Egypt':'eg',
-  'England':'gb-eng','France':'fr','Germany':'de','Ghana':'gh',
-  'Haiti':'ht','Iran':'ir','Iraq':'iq','Japan':'jp','Jordan':'jo',
-  'Mexico':'mx','Morocco':'ma','Netherlands':'nl','New Zealand':'nz',
-  'Norway':'no','Panama':'pa','Paraguay':'py','Portugal':'pt',
-  'Qatar':'qa','Saudi Arabia':'sa','Scotland':'gb-sct','Senegal':'sn',
-  'South Africa':'za','South Korea':'kr','Spain':'es','Sweden':'se',
-  'Switzerland':'ch','Tunisia':'tn',"Türkiye":'tr',
-  'United States':'us','Uruguay':'uy','Uzbekistan':'uz',
-  "Côte d'Ivoire":'ci'
+  /* ── COPA 2026 official 48 teams ── */
+  'Algeria':'dz',"Algéria":'dz',
+  'Argentina':'ar',
+  'Australia':'au',"Austrália":'au',
+  'Austria':'at',"Áustria":'at',
+  'Belgium':'be',"Bélgica":'be','Belgica':'be',
+  'Bosnia and Herzegovina':'ba','Bosnia':'ba','Bósnia':'ba',
+  'Brazil':'br','Brasil':'br',
+  'Canada':'ca',"Canadá":'ca',
+  'Cape Verde':'cv','Cabo Verde':'cv',
+  'Colombia':'co','Colômbia':'co',
+  'Croatia':'hr','Croácia':'hr','Croacia':'hr',
+  "Curaçao":'cw','Curacao':'cw',
+  'Czech Republic':'cz','Chéquia':'cz','Czechia':'cz',
+  'DR Congo':'cd','Congo DR':'cd','Congo':'cd','Democratic Republic of Congo':'cd',
+  'Ecuador':'ec','Equador':'ec',
+  'Egypt':'eg','Egito':'eg','Egipto':'eg',
+  'England':'gb-eng','Inglaterra':'gb-eng',
+  'France':'fr','França':'fr','Franca':'fr',
+  'Germany':'de','Alemanha':'de',
+  'Ghana':'gh','Gana':'gh',
+  'Haiti':'ht',
+  'Iran':'ir','Irã':'ir','Ira':'ir',
+  'Iraq':'iq','Iraque':'iq',
+  'Japan':'jp','Japão':'jp','Japao':'jp',
+  'Jordan':'jo','Jordânia':'jo','Jordania':'jo',
+  'Mexico':'mx','México':'mx',
+  'Morocco':'ma','Marrocos':'ma',
+  'Netherlands':'nl','Países Baixos':'nl','Paises Baixos':'nl','Holland':'nl',
+  'New Zealand':'nz','Nova Zelândia':'nz','Nova Zelandia':'nz',
+  'Norway':'no','Noruega':'no',
+  'Panama':'pa','Panamá':'pa',
+  'Paraguay':'py','Paraguai':'py',
+  'Portugal':'pt',
+  'Qatar':'qa','Catar':'qa',
+  'Saudi Arabia':'sa','Arábia Saudita':'sa','Arabia Saudita':'sa',
+  'Scotland':'gb-sct','Escócia':'gb-sct','Escocia':'gb-sct',
+  'Senegal':'sn',
+  'South Africa':'za','África do Sul':'za',
+  'South Korea':'kr','Korea Republic':'kr','Coreia do Sul':'kr',
+  'Spain':'es','Espanha':'es',
+  'Sweden':'se','Suécia':'se','Suecia':'se',
+  'Switzerland':'ch','Suíça':'ch','Suica':'ch',
+  'Tunisia':'tn','Tunísia':'tn',
+  'Türkiye':'tr','Turkey':'tr','Turquia':'tr','Turkiye':'tr',
+  'United States':'us','USA':'us','US':'us','Estados Unidos':'us',
+  'Uruguay':'uy','Uruguai':'uy',
+  'Uzbekistan':'uz','Uzbequistão':'uz','Uzbequistao':'uz',
+  "Côte d'Ivoire":'ci','Ivory Coast':'ci','Costa do Marfim':'ci',
+  /* ── extra aliases used in openfootball/API data ── */
+  'Korea DPR':'kp','Korea Republic':'kr',
+  'Trinidad and Tobago':'tt','Jamaica':'jm','Honduras':'hn',
+  'Costa Rica':'cr','El Salvador':'sv','Guatemala':'gt',
+  'Venezuela':'ve','Bolivia':'bo','Chile':'cl','Peru':'pe',
+  'Cameroon':'cm','Nigeria':'ng','Nigéria':'ng',
+  'Comoros':'km','Comores':'km','Angola':'ao',
+  'Tanzania':'tz','Mozambique':'mz','Zambia':'zm','Uganda':'ug',
+  'Serbia':'rs','Ukraine':'ua','Poland':'pl','Romania':'ro',
+  'Georgia':'ge','Slovakia':'sk','Slovenia':'si',
+  'Albania':'al','Iceland':'is','Italy':'it','Itália':'it',
+  'Denmark':'dk','Dinamarca':'dk','Finland':'fi',
+  'Bahrain':'bh','Oman':'om','Indonesia':'id','Fiji':'fj',
+  'China PR':'cn','China':'cn','Thailand':'th','Vietnam':'vn',
+  'Mali':'ml','Mozambique':'mz'
 };
 
 function teamFlagImg(name, w) {
   w = w || 46;
   const cc = CC[name];
-  if (!cc) return '<span style="font-size:28px;display:block;text-align:center">' + flag(name) + '</span>';
-  return '<img src="https://flagcdn.com/w80/' + cc + '.png" alt="' + name.replace(/"/g,"") + '" class="flag-img" style="width:' + w + 'px" onerror="this.onerror=null;this.src=\'\'" onload="" >';
+  const emoji = flag(name);
+  if (!cc) return '<span style="font-size:'+(w>30?28:20)+'px;display:block;text-align:center;line-height:1.2">' + emoji + '</span>';
+  const fallback = 'this.onerror=null;this.style.display=\'none\';this.nextElementSibling.style.display=\'block\'';
+  return '<img src="https://flagcdn.com/w80/' + cc + '.png" alt="' + name.replace(/"/g,'') + '" class="flag-img" style="width:' + w + 'px" onerror="' + fallback + '">'
+       + '<span style="font-size:'+(w>30?26:18)+'px;display:none;text-align:center;line-height:1.3">' + emoji + '</span>';
 }
 
 // ── GROUP STANDINGS ───────────────────────────────────────────────────────────
@@ -593,6 +647,19 @@ function renderGrupos(){
     </div>`;
   }).join('');
 }
+
+// Normalize team names from API to match COPA_TEAMS
+const TEAM_NORM={
+  'United States of America':'United States','USA':'United States',
+  'Turkey':'Türkiye','Turkiye':'Türkiye',
+  "Cote d'Ivoire":"Côte d'Ivoire","Ivory Coast":"Côte d'Ivoire",
+  'Czech Republic':'Czech Republic','Czechia':'Czech Republic',
+  'Korea Republic':'South Korea','Republic of Korea':'South Korea',
+  'Bosnia-Herzegovina':'Bosnia and Herzegovina',
+  'Congo DR':'DR Congo','Democratic Republic of Congo':'DR Congo',
+  'Cape Verde Islands':'Cape Verde'
+};
+function normTeam(n){ return TEAM_NORM[n]||n||'A definir'; }
 
 const STAGE_MAP={'GROUP_STAGE':g=>'Grupo '+(g||'').replace('GROUP_',''),'ROUND_OF_32':()=>'32 avos de Final','LAST_32':()=>'32 avos de Final','ROUND_OF_16':()=>'Oitavas de Final','LAST_16':()=>'Oitavas de Final','QUARTER_FINALS':()=>'Quartas de Final','SEMI_FINALS':()=>'Semifinal','THIRD_PLACE':()=>'3º Lugar','FINAL':()=>'Final'};
 const stageLabel=(s,g)=>STAGE_MAP[s]?STAGE_MAP[s](g):(s||'Copa 2026');
@@ -774,17 +841,19 @@ async function sha256(str){const buf=await crypto.subtle.digest('SHA-256',new Te
 
 // ══ FINALISTS ════════════════════════════════════════
 function populateTeamSelects(){
-  // Usa os times reais importados; fallback para COPA_TEAMS se ainda não importou
-  const fromMatches=Array.from(new Set(
-    Object.values(_matches).flatMap(m=>[m.t1,m.t2]).filter(t=>t&&t!=='A definir')
-  )).sort((a,b)=>a.localeCompare(b,'pt'));
-  const teams=fromMatches.length?fromMatches:COPA_TEAMS;
-  const placeholders={'pred-champion':'— escolha o campeão —','pred-runnerup':'— escolha o vice —','actual-champion':'— campeão real —','actual-runnerup':'— vice real —'};
+  // Sempre usa COPA_TEAMS — a lista oficial das 48 seleções
+  const placeholders={
+    'pred-champion':'— escolha o campeão —',
+    'pred-runnerup':'— escolha o vice —',
+    'actual-champion':'— campeão real —',
+    'actual-runnerup':'— vice real —'
+  };
   Object.entries(placeholders).forEach(([id,ph])=>{
     const el=document.getElementById(id);
     if(!el)return;
     const cur=el.value;
-    el.innerHTML=`<option value="">${ph}</option>`+teams.map(t=>`<option value="${t}">${t}</option>`).join('');
+    el.innerHTML=`<option value="">${ph}</option>`+
+      COPA_TEAMS.map(t=>`<option value="${t}">${t}</option>`).join('');
     if(cur)el.value=cur;
   });
 }
@@ -1093,11 +1162,12 @@ async function importMatches(){
       const data=await res.json();
       matches=(data.matches||[]).map((m,i)=>{
         const group=m.group||null;
+        const n1=normTeam(m.team1||'');const n2=normTeam(m.team2||'');
         return{
           id:'of_'+i,
           phase:parseOFPhase(m.round,group),
-          t1:m.team1||'A definir',f1:flag(m.team1||''),
-          t2:m.team2||'A definir',f2:flag(m.team2||''),
+          t1:n1,f1:flag(n1),
+          t2:n2,f2:flag(n2),
           dt:parseOFTime(m.date,m.time),
           type:group?'grupo':'elim',
           r1:(m.score1!=null)?m.score1:null,
