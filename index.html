@@ -1,53 +1,4 @@
-const CC={
-  'Argentina':'ar','Australia':'au','Austria':'at','Belgium':'be',
-  'Bosnia and Herzegovina':'ba','Brazil':'br','Brasil':'br','Canada':'ca',
-  'Canadá':'ca','Cape Verde':'cv','Cabo Verde':'cv','Colombia':'co',
-  'Colômbia':'co','Croatia':'hr','Croácia':'hr','Croacia':'hr',
-  "Curaçao":'cw','Czech Republic':'cz','República Tcheca':'cz',
-  'DR Congo':'cd','Congo':'cd','Ecuador':'ec','Equador':'ec',
-  'Egypt':'eg','Egito':'eg','Egipto':'eg','England':'gb-eng',
-  'Inglaterra':'gb-eng','France':'fr','França':'fr','Franca':'fr',
-  'Germany':'de','Alemanha':'de','Ghana':'gh','Gana':'gh',
-  'Haiti':'ht','Iran':'ir','Irã':'ir','Ira':'ir','Iraq':'iq',
-  'Iraque':'iq','Japan':'jp','Japão':'jp','Japao':'jp',
-  'Jordan':'jo','Jordânia':'jo','Jordania':'jo','Mexico':'mx',
-  'México':'mx','Morocco':'ma','Marrocos':'ma','Netherlands':'nl',
-  'Países Baixos':'nl','Paises Baixos':'nl','New Zealand':'nz',
-  'Nova Zelândia':'nz','Nova Zelandia':'nz','Norway':'no',
-  'Noruega':'no','Panama':'pa','Panamá':'pa','Paraguay':'py',
-  'Paraguai':'py','Portugal':'pt','Qatar':'qa','Catar':'qa',
-  'Saudi Arabia':'sa','Arábia Saudita':'sa','Arabia Saudita':'sa',
-  'Scotland':'gb-sct','Escócia':'gb-sct','Escocia':'gb-sct',
-  'Senegal':'sn','South Africa':'za','África do Sul':'za',
-  'South Korea':'kr','Coreia do Sul':'kr','Spain':'es',
-  'Espanha':'es','Sweden':'se','Suécia':'se','Suecia':'se',
-  'Switzerland':'ch','Suíça':'ch','Suica':'ch','Tunisia':'tn',
-  'Tunísia':'tn','Türkiye':'tr','Turkey':'tr','Turquia':'tr',
-  'United States':'us','Estados Unidos':'us','USA':'us',
-  'Uruguay':'uy','Uruguai':'uy','Uzbekistan':'uz',
-  'Uzbequistão':'uz','Uzbequistao':'uz',
-  "Côte d'Ivoire":'ci','Costa do Marfim':'ci','Ivory Coast':'ci',
-  'Cameroon':'cm','Cameroun':'cm','Nigeria':'ng','Nigéria':'ng',
-  'Algeria':'dz','Comoros':'km','Comores':'km','Jamaica':'jm',
-  'Honduras':'hn','Costa Rica':'cr','El Salvador':'sv',
-  'Venezuela':'ve','Bolivia':'bo','Chile':'cl','Peru':'pe',
-  'Serbia':'rs','Sérvia':'rs','Ukraine':'ua','Ucrânia':'ua',
-  'Poland':'pl','Polônia':'pl','Romania':'ro','Georgia':'ge',
-  'Slovakia':'sk','Eslováquia':'sk','Slovenia':'si',
-  'Albania':'al','Albânia':'al','Denmark':'dk','Dinamarca':'dk',
-  'Italy':'it','Itália':'it','Belgium':'be','Bélgica':'be',
-  'Indonesia':'id','Indonésia':'id','Bahrain':'bh','Oman':'om',
-  'Fiji':'fj','Tanzania':'tz','Angola':'ao','Uganda':'ug','Mali':'ml'
-};const COPA_TEAMS=[
-  'Argentina','Australia','Austria','Belgium','Bosnia and Herzegovina',
-  'Brazil','Canada','Cape Verde','Colombia','Croatia','Curaçao',
-  'Czech Republic','DR Congo','Ecuador','Egypt','England','France',
-  'Germany','Ghana','Haiti','Iran','Iraq','Japan','Jordan','Mexico',
-  'Morocco','Netherlands','New Zealand','Norway','Panama','Paraguay',
-  'Portugal','Qatar','Saudi Arabia','Scotland','Senegal','South Africa',
-  'South Korea','Spain','Sweden','Switzerland','Tunisia','Türkiye',
-  'United States','Uruguay','Uzbekistan',"Côte d'Ivoire"
-].sort((a,b)=>a.localeCompare(b,'pt'));<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -456,6 +407,15 @@ input[type=datetime-local]{color-scheme:dark}
           </label>
         </div>
         <div id="final-result-display" style="margin-top:10px;font-size:12px;color:var(--muted)"></div>
+        <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+          <p style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:10px">&#128465; Resetar palpite de um participante</p>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <select id="reset-user-sel" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;color:var(--text);flex:1">
+              <option value="">— selecione o participante —</option>
+            </select>
+            <button class="del-btn" style="padding:8px 16px;font-size:12px" onclick="resetFinalistPred()">&#128465; Resetar palpite</button>
+          </div>
+        </div>
       </div>
       <div class="ac">
         <div class="ah">&#128268; API football-data.org</div>
@@ -550,16 +510,17 @@ const PAGES=['inicio','jogos','grupos','ranking','regras','admin'];
 
 // ══ TEAMS ═══════════════════════════════════════════
 const COPA_TEAMS=[
-  'África do Sul','Albania','Alemanha','Algeria','Arabia Saudita','Argentina','Australia',
-  'Austria','Belgica','Bolivia','Brasil','Cabo Verde','Cameroun','Canada','Chile',
-  'Colombia','Comores','Congo','Coreia do Sul','Costa do Marfim','Croacia','Dinamarca',
-  'Egipto','Equador','Escocia','Eslovaquia','Eslovenia','Espanha','Estados Unidos',
-  'Franca','Georgia','Ghana','Honduras','Indonesia','Inglaterra','Ira','Iraque',
-  'Italia','Jamaica','Japao','Jordania','Marrocos','Mexico','Nigeria',
-  'Nova Zelandia','Paises Baixos','Panama','Polonia','Portugal','Romania',
-  'Senegal','Serbia','Suica','Tunisia','Turquia','Ucrania','Uruguai',
-  'Uzbequistao','Venezuela'
-].sort();
+  'Algeria','Argentina','Australia','Austria','Belgium',
+  'Bosnia and Herzegovina','Brazil','Canada','Cape Verde','Colombia',
+  'Croatia','Curaçao','Czech Republic','DR Congo','Ecuador',
+  'Egypt','England','France','Germany','Ghana',
+  'Haiti','Iran','Iraq','Japan','Jordan',
+  'Mexico','Morocco','Netherlands','New Zealand','Norway',
+  'Panama','Paraguay','Portugal','Qatar','Saudi Arabia',
+  'Scotland','Senegal','South Africa','South Korea','Spain',
+  'Sweden','Switzerland','Tunisia','Türkiye','United States',
+  'Uruguay','Uzbekistan',"Côte d'Ivoire"
+].sort((a,b)=>a.localeCompare(b,'pt'));
 
 // ══ FLAGS ═══════════════════════════════════════════
 const FLAGS={'Brazil':'🇧🇷','Brasil':'🇧🇷','Argentina':'🇦🇷','Colombia':'🇨🇴','Colômbia':'🇨🇴','Ecuador':'🇪🇨','Equador':'🇪🇨','Uruguay':'🇺🇾','Uruguai':'🇺🇾','Venezuela':'🇻🇪','Mexico':'🇲🇽','México':'🇲🇽','United States':'🇺🇸','Estados Unidos':'🇺🇸','USA':'🇺🇸','Canada':'🇨🇦','Canadá':'🇨🇦','Jamaica':'🇯🇲','Honduras':'🇭🇳','Panama':'🇵🇦','Panamá':'🇵🇦','France':'🇫🇷','Franca':'🇫🇷','França':'🇫🇷','Germany':'🇩🇪','Alemanha':'🇩🇪','Spain':'🇪🇸','Espanha':'🇪🇸','England':'🏴󠁧󠁢󠁥󠁮󠁧󠁿','Inglaterra':'🏴󠁧󠁢󠁥󠁮󠁧󠁿','Portugal':'🇵🇹','Netherlands':'🇳🇱','Paises Baixos':'🇳🇱','Belgium':'🇧🇪','Belgica':'🇧🇪','Bélgica':'🇧🇪','Italy':'🇮🇹','Italia':'🇮🇹','Itália':'🇮🇹','Croatia':'🇭🇷','Croacia':'🇭🇷','Croácia':'🇭🇷','Switzerland':'🇨🇭','Suica':'🇨🇭','Suíça':'🇨🇭','Denmark':'🇩🇰','Dinamarca':'🇩🇰','Turkey':'🇹🇷','Turquia':'🇹🇷','Austria':'🇦🇹','Austria':'🇦🇹','Áustria':'🇦🇹','Scotland':'🏴󠁧󠁢󠁳󠁣󠁴󠁿','Escocia':'🏴󠁧󠁢󠁳󠁣󠁴󠁿','Escócia':'🏴󠁧󠁢󠁳󠁣󠁴󠁿','Serbia':'🇷🇸','Sérvia':'🇷🇸','Ukraine':'🇺🇦','Ucrania':'🇺🇦','Ucrânia':'🇺🇦','Poland':'🇵🇱','Polonia':'🇵🇱','Polônia':'🇵🇱','Romania':'🇷🇴','Georgia':'🇬🇪','Slovakia':'🇸🇰','Eslovaquia':'🇸🇰','Eslováquia':'🇸🇰','Slovenia':'🇸🇮','Eslovenia':'🇸🇮','Eslovênia':'🇸🇮','Morocco':'🇲🇦','Marrocos':'🇲🇦','Senegal':'🇸🇳','Nigeria':'🇳🇬','Nigéria':'🇳🇬','Cameroon':'🇨🇲','Cameroun':'🇨🇲','Egypt':'🇪🇬','Egipto':'🇪🇬','Egito':'🇪🇬','Ghana':'🇬🇭','Gana':'🇬🇭','Tunisia':'🇹🇳','Tunísia':'🇹🇳','DR Congo':'🇨🇩','Congo':'🇨🇩','Ivory Coast':'🇨🇮','Costa do Marfim':'🇨🇮',"Côte d'Ivoire":'🇨🇮','Algeria':'🇩🇿','Algeria':'🇩🇿','South Africa':'🇿🇦','África do Sul':'🇿🇦','Comores':'🇰🇲','Cabo Verde':'🇨🇻','Japan':'🇯🇵','Japao':'🇯🇵','Japão':'🇯🇵','South Korea':'🇰🇷','Coreia do Sul':'🇰🇷','Australia':'🇦🇺','Austrália':'🇦🇺','Iran':'🇮🇷','Ira':'🇮🇷','Irã':'🇮🇷','Saudi Arabia':'🇸🇦','Arabia Saudita':'🇸🇦','Arábia Saudita':'🇸🇦','Iraq':'🇮🇶','Iraque':'🇮🇶','Uzbekistan':'🇺🇿','Uzbequistao':'🇺🇿','Uzbequistão':'🇺🇿','Jordan':'🇯🇴','Jordania':'🇯🇴','Jordânia':'🇯🇴','Indonesia':'🇮🇩','Indonésia':'🇮🇩','New Zealand':'🇳🇿','Nova Zelandia':'🇳🇿','Nova Zelândia':'🇳🇿'};
@@ -568,7 +529,21 @@ const flag=n=>FLAGS[n]||'🏳️';
 const ISO2={'Mexico':'mx','México':'mx','United States':'us','USA':'us','Canada':'ca','Jamaica':'jm','Honduras':'hn','Panama':'pa','Panamá':'pa','Costa Rica':'cr','El Salvador':'sv','Trinidad and Tobago':'tt','Guatemala':'gt','Cuba':'cu','Suriname':'sr','Brazil':'br','Brasil':'br','Argentina':'ar','Colombia':'co','Colômbia':'co','Ecuador':'ec','Equador':'ec','Uruguay':'uy','Uruguai':'uy','Venezuela':'ve','Chile':'cl','Peru':'pe','Paraguay':'py','Bolivia':'bo','France':'fr','Franca':'fr','França':'fr','Germany':'de','Alemanha':'de','Spain':'es','Espanha':'es','England':'gb-eng','Inglaterra':'gb-eng','Portugal':'pt','Netherlands':'nl','Paises Baixos':'nl','Belgium':'be','Belgica':'be','Bélgica':'be','Italy':'it','Italia':'it','Itália':'it','Croatia':'hr','Croacia':'hr','Croácia':'hr','Switzerland':'ch','Suica':'ch','Suíça':'ch','Denmark':'dk','Dinamarca':'dk','Turkey':'tr','Turquia':'tr','Austria':'at','Áustria':'at','Scotland':'gb-sct','Escocia':'gb-sct','Escócia':'gb-sct','Serbia':'rs','Sérvia':'rs','Ukraine':'ua','Ucrania':'ua','Ucrânia':'ua','Poland':'pl','Polonia':'pl','Polônia':'pl','Romania':'ro','Romênia':'ro','Georgia':'ge','Geórgia':'ge','Slovakia':'sk','Eslováquia':'sk','Slovenia':'si','Eslovênia':'si','Albania':'al','Albânia':'al','Wales':'gb-wls','Sweden':'se','Norway':'no','Czech Republic':'cz','Greece':'gr','Hungary':'hu','Finland':'fi','Iceland':'is','Morocco':'ma','Marrocos':'ma','Senegal':'sn','Nigeria':'ng','Nigéria':'ng','Cameroon':'cm','Cameroun':'cm','Egypt':'eg','Egipto':'eg','Egito':'eg','Ghana':'gh','Gana':'gh','Tunisia':'tn','Tunísia':'tn','DR Congo':'cd','Congo':'cd','Ivory Coast':'ci','Costa do Marfim':'ci',"Côte d'Ivoire":'ci','Algeria':'dz','Argélia':'dz','South Africa':'za','África do Sul':'za','Africa do Sul':'za','Comoros':'km','Comores':'km','Cape Verde':'cv','Cabo Verde':'cv','Mali':'ml','Mozambique':'mz','Tanzania':'tz','Angola':'ao','Zambia':'zm','Japan':'jp','Japao':'jp','Japão':'jp','South Korea':'kr','Coreia do Sul':'kr','Australia':'au','Austrália':'au','Iran':'ir','Ira':'ir','Irã':'ir','Saudi Arabia':'sa','Arabia Saudita':'sa','Arábia Saudita':'sa','Iraq':'iq','Iraque':'iq','Uzbekistan':'uz','Uzbequistao':'uz','Uzbequistão':'uz','Jordan':'jo','Jordania':'jo','Jordânia':'jo','China PR':'cn','Indonesia':'id','Indonésia':'id','New Zealand':'nz','Nova Zelandia':'nz','Nova Zelândia':'nz','Fiji':'fj','Qatar':'qa','Bahrain':'bh','Oman':'om'};
 
 // ── COUNTRY CODES for flagcdn.com ────────────────────────────────────────────
-const CC={'Argentina':'ar','Brasil':'br','Brazil':'br','Colombia':'co','Colômbia':'co','Ecuador':'ec','Equador':'ec','Uruguay':'uy','Uruguai':'uy','Venezuela':'ve','Mexico':'mx','México':'mx','United States':'us','Estados Unidos':'us','USA':'us','Canada':'ca','Canadá':'ca','Jamaica':'jm','Honduras':'hn','Panama':'pa','Panamá':'pa','Costa Rica':'cr','El Salvador':'sv','Trinidad and Tobago':'tt','Guatemala':'gt','Cuba':'cu','Suriname':'sr','France':'fr','França':'fr','Franca':'fr','Germany':'de','Alemanha':'de','Spain':'es','Espanha':'es','England':'gb-eng','Inglaterra':'gb-eng','Portugal':'pt','Netherlands':'nl','Países Baixos':'nl','Paises Baixos':'nl','Belgium':'be','Bélgica':'be','Belgica':'be','Italy':'it','Itália':'it','Italia':'it','Croatia':'hr','Croácia':'hr','Croacia':'hr','Switzerland':'ch','Suíça':'ch','Suica':'ch','Denmark':'dk','Dinamarca':'dk','Turkey':'tr','Turquia':'tr','Austria':'at','Áustria':'at','Scotland':'gb-sct','Escócia':'gb-sct','Escocia':'gb-sct','Serbia':'rs','Sérvia':'rs','Ukraine':'ua','Ucrânia':'ua','Ucrania':'ua','Poland':'pl','Polônia':'pl','Polonia':'pl','Romania':'ro','Romênia':'ro','Georgia':'ge','Slovakia':'sk','Eslováquia':'sk','Eslovaquia':'sk','Slovenia':'si','Eslovênia':'si','Eslovenia':'si','Albania':'al','Albânia':'al','Iceland':'is','Norway':'no','Sweden':'se','Finland':'fi','Morocco':'ma','Marrocos':'ma','Senegal':'sn','Nigeria':'ng','Nigéria':'ng','Cameroon':'cm','Cameroun':'cm','Egypt':'eg','Egito':'eg','Egipto':'eg','Ghana':'gh','Tunisia':'tn','Tunísia':'tn','DR Congo':'cd','Congo':'cd',"Côte d'Ivoire":'ci','Ivory Coast':'ci','Costa do Marfim':'ci','Algeria':'dz','Algéria':'dz','South Africa':'za','África do Sul':'za','Comoros':'km','Comores':'km','Cape Verde':'cv','Cabo Verde':'cv','Tanzania':'tz','Mozambique':'mz','Angola':'ao','Zambia':'zm','Uganda':'ug','Mali':'ml','Japan':'jp','Japão':'jp','Japao':'jp','South Korea':'kr','Coreia do Sul':'kr','Australia':'au','Austrália':'au','Iran':'ir','Irã':'ir','Ira':'ir','Saudi Arabia':'sa','Arábia Saudita':'sa','Arabia Saudita':'sa','Iraq':'iq','Iraque':'iq','Uzbekistan':'uz','Uzbequistão':'uz','Uzbequistao':'uz','Jordan':'jo','Jordânia':'jo','Jordania':'jo','Indonesia':'id','Indonésia':'id','New Zealand':'nz','Nova Zelândia':'nz','Nova Zelandia':'nz','Czech Republic':'cz','República Tcheca':'cz','China PR':'cn','China':'cn','Bahrain':'bh','Oman':'om','Fiji':'fj','Thailand':'th'};
+const CC={
+  'Argentina':'ar','Australia':'au','Austria':'at','Belgium':'be',
+  'Bosnia and Herzegovina':'ba','Brazil':'br','Canada':'ca',
+  'Cape Verde':'cv',"Curaçao":'cw','Colombia':'co','Croatia':'hr',
+  'Czech Republic':'cz','DR Congo':'cd','Ecuador':'ec','Egypt':'eg',
+  'England':'gb-eng','France':'fr','Germany':'de','Ghana':'gh',
+  'Haiti':'ht','Iran':'ir','Iraq':'iq','Japan':'jp','Jordan':'jo',
+  'Mexico':'mx','Morocco':'ma','Netherlands':'nl','New Zealand':'nz',
+  'Norway':'no','Panama':'pa','Paraguay':'py','Portugal':'pt',
+  'Qatar':'qa','Saudi Arabia':'sa','Scotland':'gb-sct','Senegal':'sn',
+  'South Africa':'za','South Korea':'kr','Spain':'es','Sweden':'se',
+  'Switzerland':'ch','Tunisia':'tn',"Türkiye":'tr',
+  'United States':'us','Uruguay':'uy','Uzbekistan':'uz',
+  "Côte d'Ivoire":'ci'
+};
 
 function teamFlagImg(name, w) {
   w = w || 46;
@@ -1033,6 +1008,16 @@ function renderRanking(){
 function setDot(s,m){const d=document.getElementById('api-dot'),t=document.getElementById('api-txt');if(d)d.className='dot '+s;if(t)t.textContent=m;}
 function setProgress(p){const b=document.getElementById('pbar'),f=document.getElementById('pfill');if(!b||!f)return;if(p<0){b.style.display='none';return;}b.style.display='block';f.style.width=p+'%';}
 
+async function resetFinalistPred(){
+  const uid=document.getElementById('reset-user-sel')?.value;
+  if(!uid){toast('Selecione um participante!','t-err');return;}
+  const u=_users[uid];
+  if(!confirm('Resetar o palpite dos finalistas de '+( u?.name||uid)+'? Ele poderá escolher novamente.'))return;
+  await db.ref('finalPreds/'+uid).remove();
+  toast('Palpite resetado. O participante pode escolher novamente.');
+  renderAdmin();
+}
+
 async function saveFinalResult(){
   const champ=document.getElementById('actual-champion')?.value;
   const runner=document.getElementById('actual-runnerup')?.value;
@@ -1054,6 +1039,18 @@ function renderAdmin(){
   if(ar&&_finalResult?.runnerUp)ar.value=_finalResult.runnerUp;
   if(lk)lk.checked=!!_finalResult?.locked;
   if(rd)rd.textContent=_finalResult?.champion?`Resultado: ${_finalResult.champion} (campeão) × ${_finalResult.runnerUp} (vice)`:'Nenhum resultado configurado ainda.';
+  // Populate reset user select
+  const rus=document.getElementById('reset-user-sel');
+  if(rus){
+    const cur=rus.value;
+    rus.innerHTML='<option value="">— selecione o participante —</option>'+
+      Object.entries(_users).map(([uid,u])=>{
+        const fp=_finalPreds[uid];
+        const label=(u.name||u.email)+(fp?.champion?' (palpitou: '+fp.champion+')':' (sem palpite)');
+        return`<option value="${uid}">${label}</option>`;
+      }).join('');
+    if(cur)rus.value=cur;
+  }
   renderAdminMatches();renderAdminUsers();
 }
 
