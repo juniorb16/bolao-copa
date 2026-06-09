@@ -201,6 +201,31 @@ input[type=datetime-local]{color-scheme:dark}
 
 <div id="pg-login" class="pg on">
   <div class="auth-wrap">
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px 18px;margin-bottom:16px;width:100%;max-width:430px">
+      <p style="font-size:13px;font-weight:700;color:var(--gold);margin-bottom:10px">&#128203; Leia as regras antes de entrar</p>
+      <div style="display:grid;gap:7px">
+        <div style="display:flex;align-items:flex-start;gap:9px;font-size:12px;color:var(--muted);line-height:1.5">
+          <span style="color:var(--gold);flex-shrink:0">&#128176;</span>
+          <span>Inscrição: <strong style="color:var(--text)">R$ 25,00 por pessoa</strong> — 1° lugar leva <strong style="color:var(--gold)">80%</strong> do total, 2° lugar leva <strong style="color:var(--green)">20%</strong>.</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:9px;font-size:12px;color:var(--muted);line-height:1.5">
+          <span style="color:var(--gold);flex-shrink:0">&#127942;</span>
+          <span>Ao entrar, escolha o <strong style="color:var(--text)">campeão da Copa</strong> — obrigatório e <strong style="color:var(--text)">definitivo</strong>, não pode alterar depois.</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:9px;font-size:12px;color:var(--muted);line-height:1.5">
+          <span style="color:var(--green);flex-shrink:0">&#9917;</span>
+          <span>Palpite o placar de cada jogo. Salvo <strong style="color:var(--text)">automaticamente</strong> — trava <strong style="color:var(--text)">1 hora antes</strong> do início.</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:9px;font-size:12px;color:var(--muted);line-height:1.5">
+          <span style="color:var(--blue);flex-shrink:0">&#128202;</span>
+          <span>Pontuação: <strong style="color:var(--text)">+3</strong> placar exato · <strong style="color:var(--text)">+1</strong> vencedor · <strong style="color:var(--text)">+2</strong> classificado · <strong style="color:var(--gold)">+30</strong> campeão acertado.</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:9px;font-size:12px;color:var(--muted);line-height:1.5">
+          <span style="color:var(--red);flex-shrink:0">&#9888;&#65039;</span>
+          <span>Sem palpite antes da trava = <strong style="color:var(--text)">0 pontos</strong> no jogo. Não há como recuperar depois.</span>
+        </div>
+      </div>
+    </div>
     <span class="auth-ball">&#9917;</span>
     <h1 class="auth-title">Bolão Copa 2026</h1>
     <p class="auth-sub">Brasil &middot; Canadá &middot; México &middot; EUA</p>
@@ -264,8 +289,8 @@ input[type=datetime-local]{color-scheme:dark}
     <button class="nb on" id="nb-inicio" onclick="goPage('inicio')">&#127968; Início</button>
     <button class="nb" id="nb-jogos" onclick="goPage('jogos')">&#9917; Jogos</button>
     <button class="nb" id="nb-grupos" onclick="goPage('grupos')">&#128202; Grupos</button>
+    <button class="nb" id="nb-chaveamento" onclick="goPage('chaveamento')">&#9974;&#65039; Chaveamento</button>
     <button class="nb" id="nb-ranking" onclick="goPage('ranking')">&#127942; Ranking</button>
-    <button class="nb" id="nb-grupos" onclick="goPage('grupos')">&#128202; Grupos</button>
     <button class="nb" id="nb-regras" onclick="goPage('regras')">&#128203; Regras</button>
     <button class="nb" id="nb-admin" onclick="checkAdmin()" style="display:none">&#9881;&#65039; Admin</button>
   </nav>
@@ -280,30 +305,27 @@ input[type=datetime-local]{color-scheme:dark}
       <div style="background:var(--bg2);border:1px solid rgba(245,197,24,.35);border-radius:14px;padding:20px;margin-bottom:16px">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
           <span style="font-size:26px">&#127942;</span>
-          <div><p style="font-size:16px;font-weight:700;color:var(--gold)">Palpite dos Finalistas</p>
-          <p style="font-size:12px;color:var(--muted)">Quem vai chegar à final da Copa 2026?</p></div>
+          <div><p style="font-size:16px;font-weight:700;color:var(--gold)">Escolha o Campeão</p>
+          <p style="font-size:12px;color:var(--muted)">Quem vai ganhar a Copa do Mundo 2026?</p></div>
         </div>
         <div style="background:rgba(245,197,24,.07);border:1px solid rgba(245,197,24,.2);border-radius:9px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:var(--gold)">
-          &#127941; Acertar <strong>campeão E vice</strong> → <strong>+60 pts</strong> &nbsp;·&nbsp; &#127919; Acertar <strong>apenas 1</strong> → <strong>+40 pts</strong>
+          &#127942; Acertar o <strong>campeão da Copa</strong> → <strong>+30 pts</strong> &nbsp;·&nbsp; &#128274; Confirmado, não pode alterar depois
         </div>
         <div id="final-locked-msg" style="display:none;background:rgba(231,76,60,.1);border:1px solid rgba(231,76,60,.3);border-radius:8px;padding:9px 14px;font-size:12px;color:var(--red);margin-bottom:12px">
           &#128274; Palpite dos finalistas bloqueado pelo administrador.
         </div>
         <div id="final-pred-form">
-          <div class="fg" style="margin-bottom:12px">
-            <div class="ff"><label>&#129351; Campeão</label>
-              <select id="pred-champion" class="qsel" style="margin-top:0"><option value="">— escolha o campeão —</option></select>
-            </div>
-            <div class="ff"><label>&#129352; Vice-Campeão</label>
-              <select id="pred-runnerup" class="qsel" style="margin-top:0"><option value="">— escolha o vice —</option></select>
-            </div>
-          </div>
-          <button class="save-btn" style="margin-top:0" onclick="saveFinalPred()">Confirmar palpite dos finalistas</button>
+          <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;display:block">&#129351; Selecione o Campeão da Copa 2026</label>
+          <select id="pred-champion" class="qsel" style="margin-top:0"><option value="">— escolha o campeão —</option></select>
+          <button class="save-btn" style="margin-top:12px" onclick="saveFinalPred()">Confirmar campeão</button>
         </div>
         <div id="final-pred-saved" style="display:none;margin-top:10px">
-          <div style="background:rgba(0,214,126,.08);border:1px solid rgba(0,214,126,.25);border-radius:8px;padding:10px 14px;font-size:13px">
-            <p style="color:var(--green);font-weight:700;margin-bottom:4px">&#10003; Palpite salvo</p>
-            <p style="color:var(--muted)">Campeão: <strong id="saved-champ" style="color:var(--text)"></strong> &nbsp;·&nbsp; Vice: <strong id="saved-runner" style="color:var(--text)"></strong></p>
+          <div style="background:rgba(0,214,126,.08);border:1px solid rgba(0,214,126,.25);border-radius:8px;padding:12px 16px;font-size:13px;display:flex;align-items:center;gap:12px">
+            <div id="saved-champ-flag"></div>
+            <div>
+              <p style="color:var(--green);font-weight:700;margin-bottom:2px;font-size:12px">&#128274; Campeão confirmado — não pode alterar</p>
+              <p style="margin:0;font-size:15px;font-weight:700;color:var(--text)" id="saved-champ"></p>
+            </div>
             <span id="saved-edit-btn" style="display:none"></span>
           </div>
         </div>
@@ -314,9 +336,10 @@ input[type=datetime-local]{color-scheme:dark}
       <div class="rc">
         <div class="rh">&#128203; Regras Rápidas</div>
         <ul class="rl">
+          <li>&#128176; Inscrição: <strong>R$ 25,00 por pessoa</strong> — 1° lugar leva <strong style="color:var(--gold)">80%</strong> do valor arrecadado, 2° lugar leva <strong style="color:var(--green)">20%</strong>.</li>
           <li>Palpite o placar de cada jogo antes de <strong>1h do início</strong> — após esse prazo é bloqueado automaticamente.</li>
-          <li>Placar exato: <strong>3 pts</strong> · Acertou vencedor/empate: <strong>1 pt</strong> · Classificado em eliminatórios: <strong>2 pts</strong>.</li>
-          <li>Palpite dos finalistas: acertar os 2 = <strong>+60 pts</strong> · acertar 1 = <strong>+40 pts</strong>.</li>
+          <li>Pontuação: placar exato <strong>+3 pts</strong> · vencedor/empate <strong>+1 pt</strong> · classificado elim. <strong>+2 pts</strong> · campeão acertado <strong style="color:var(--gold)">+30 pts</strong>.</li>
+          <li>Sem palpite antes da trava = 0 pontos no jogo. Não há como recuperar depois.</li>
           <li>Empate no ranking: desempate pelo número de placares exatos.</li>
         </ul>
       </div>
@@ -347,7 +370,7 @@ input[type=datetime-local]{color-scheme:dark}
         <div class="pts-box"><div class="pv">2</div><div class="pl">Classificado</div></div>
       </div>
       <div style="background:rgba(245,197,24,.07);border:1px solid rgba(245,197,24,.2);border-radius:10px;padding:10px 16px;margin-bottom:16px;font-size:12px;color:var(--gold)">
-        &#127942; Palpite dos finalistas: <strong>+60 pts</strong> (acertar os 2) · <strong>+40 pts</strong> (acertar 1)
+        &#127942; Acertar o campeão da Copa: <strong>+30 pts</strong> · A bandeira ao lado do nome é a seleção escolhida por cada participante
       </div>
       <div id="ranking-container"><div class="spinner"></div></div>
     </div>
@@ -359,14 +382,32 @@ input[type=datetime-local]{color-scheme:dark}
       <div id="grupos-container"><div class="spinner"></div></div>
     </div>
 
+    <div id="page-chaveamento" class="pg">
+      <div style="background:rgba(245,197,24,.07);border:1px solid rgba(245,197,24,.2);border-radius:10px;padding:10px 16px;margin-bottom:14px;font-size:12px;color:var(--gold)">
+        &#9974;&#65039; Os confrontos se montam automaticamente conforme os times avançam. Admin lança os resultados e o chaveamento atualiza em tempo real.
+      </div>
+      <div id="chaveamento-container"><div class="spinner"></div></div>
+    </div>
+
     <div id="page-regras" class="pg">
+      <div class="rc" style="border-color:rgba(245,197,24,.4)">
+        <div class="rh" style="color:var(--gold)">&#128176; Premiação</div>
+        <ul class="rl">
+          <li>Inscrição: <strong>R$ 25,00 por pessoa</strong> — pagamento a combinar com o organizador.</li>
+          <li>&#129351; 1° lugar recebe <strong style="color:var(--gold)">80%</strong> do total arrecadado.</li>
+          <li>&#129352; 2° lugar recebe <strong style="color:var(--green)">20%</strong> do total arrecadado.</li>
+          <li>Exemplo: 10 participantes = R$ 250 → 1° leva R$ 200, 2° leva R$ 50.</li>
+        </ul>
+      </div>
       <div class="rc"><div class="rh">&#127942; Como Funciona</div>
         <ul class="rl">
-          <li>Crie uma conta com e-mail e senha para acessar o bolão.</li>
-          <li>Para cada partida, palpite o placar exato antes de <strong>1h do início</strong>.</li>
-          <li>Em jogos eliminatórios, escolha também qual time avança de fase.</li>
-          <li>Na página Início, escolha o campeão e o vice-campeão da Copa antes da final.</li>
-          <li>Esqueceu a senha? Clique em "Esqueci minha senha" para receber link por e-mail.</li>
+          <li>Crie uma conta com e-mail e senha — disponível para todos com o link do bolão.</li>
+          <li>Na tela Início, escolha o campeão da Copa — obrigatório e definitivo, não pode alterar após confirmar.</li>
+          <li>Na aba Jogos, palpite o placar de cada partida. O palpite salva automaticamente enquanto você digita — sem precisar clicar em botão.</li>
+          <li>Os palpites ficam editáveis até exatamente <strong>1 hora antes do início</strong> do jogo — depois travam sozinhos e não há como recuperar.</li>
+          <li>Em jogos eliminatórios, escolha também qual time avança de fase (+2 pts se acertar).</li>
+          <li>Na aba Chaveamento, veja o bracket do torneio — os confrontos se montam automaticamente conforme os times avançam.</li>
+          <li>Esqueceu a senha? Na tela de login, clique em "Esqueci minha senha" para receber o link por e-mail.</li>
         </ul>
       </div>
       <div class="rc"><div class="rh">&#128202; Pontuação</div>
@@ -376,9 +417,8 @@ input[type=datetime-local]{color-scheme:dark}
             <tr><td><strong>Placar exato</strong><br><span style="font-size:12px;color:var(--muted)">Palpitou 2×1 e resultado foi 2×1</span></td><td style="text-align:right"><span class="ptn">3</span> pts</td></tr>
             <tr><td><strong>Vencedor ou empate certo</strong><br><span style="font-size:12px;color:var(--muted)">Palpitou 2×1 e resultado foi 3×1</span></td><td style="text-align:right"><span class="ptn">1</span> pt</td></tr>
             <tr><td><strong>Classificado certo</strong> <span class="badge b-blue" style="font-size:9px;vertical-align:middle">elim.</span></td><td style="text-align:right"><span class="ptn">2</span> pts</td></tr>
-            <tr><td><strong>Finalistas — acertar campeão E vice</strong></td><td style="text-align:right"><span class="ptn" style="color:var(--gold)">60</span> pts</td></tr>
-            <tr><td><strong>Finalistas — acertar apenas 1</strong></td><td style="text-align:right"><span class="ptn" style="color:var(--gold)">40</span> pts</td></tr>
-            <tr><td><strong>Errou / sem palpite</strong></td><td style="text-align:right"><span class="ptn" style="color:var(--red)">0</span> pts</td></tr>
+            <tr><td><strong>Acertar o campeão da Copa</strong><br><span style="font-size:12px;color:var(--muted)">Escolhido na tela Início — calculado ao final</span></td><td style="text-align:right"><span class="ptn" style="color:var(--gold)">30</span> pts</td></tr>
+            <tr><td><strong>Sem palpite / palpite errado</strong></td><td style="text-align:right"><span class="ptn" style="color:var(--red)">0</span> pts</td></tr>
           </tbody>
         </table>
       </div>
@@ -391,12 +431,9 @@ input[type=datetime-local]{color-scheme:dark}
         <div style="background:rgba(245,197,24,.07);border:1px solid rgba(245,197,24,.2);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--gold);margin-bottom:14px">
           Configure após o término da Copa. Os pontos bônus (+60/+40) são calculados automaticamente no ranking.
         </div>
-        <div class="fg" style="margin-bottom:12px">
-          <div class="ff"><label>&#129351; Campeão real</label>
-            <select id="actual-champion" class="qsel" style="margin-top:0"><option value="">— campeão real —</option></select>
-          </div>
-          <div class="ff"><label>&#129352; Vice-Campeão real</label>
-            <select id="actual-runnerup" class="qsel" style="margin-top:0"><option value="">— vice real —</option></select>
+        <div style="margin-bottom:14px">
+          <div class="ff"><label>&#129351; Campeão real da Copa 2026</label>
+            <select id="actual-champion" class="qsel" style="margin-top:6px"><option value="">— campeão real —</option></select>
           </div>
         </div>
         <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
@@ -506,7 +543,7 @@ const ADMIN_HASH = 'db6f20ac0787ad306f4df4efbe6e21586b7dfeea039582cd67a9fb4a4a8c
 let auth, db, currentUser=null, userProfile=null, isAdminSession=false;
 let _matches={}, _preds={}, _users={}, _finalPreds={}, _finalResult={};
 let currentPage='inicio';
-const PAGES=['inicio','jogos','grupos','ranking','regras','admin'];
+const PAGES=['inicio','jogos','grupos','chaveamento','ranking','regras','admin'];
 
 // ══ TEAMS ═══════════════════════════════════════════
 const COPA_TEAMS=[
@@ -604,6 +641,110 @@ function teamFlagImg(name, w) {
   const fallback = 'this.onerror=null;this.style.display=\'none\';this.nextElementSibling.style.display=\'block\'';
   return '<img src="https://flagcdn.com/w80/' + cc + '.png" alt="' + name.replace(/"/g,'') + '" class="flag-img" style="width:' + w + 'px" onerror="' + fallback + '">'
        + '<span style="font-size:'+(w>30?26:18)+'px;display:none;text-align:center;line-height:1.3">' + emoji + '</span>';
+}
+
+
+// ══ CHAVEAMENTO ══════════════════════════════════════════════════════════════
+const KNOCKOUT_PHASES = ['32 avos de Final','Oitavas de Final','Quartas de Final','Semifinal','3º Lugar','Final'];
+const PHASE_SHORT={'32 avos de Final':'32 avos','Oitavas de Final':'Oitavas','Quartas de Final':'Quartas','Semifinal':'Semi','3º Lugar':'3º Lugar','Final':'Final'};
+
+function renderChaveamento(){
+  const c=document.getElementById('chaveamento-container');
+  const allMs=Object.values(_matches);
+  const koMs=allMs.filter(m=>KNOCKOUT_PHASES.includes(m.phase));
+
+  if(!koMs.length){
+    c.innerHTML=`<div class="empty"><div class="empty-ico">&#9974;&#65039;</div>
+      <p>Fase eliminatória ainda não disponível.<br>
+      <span style="font-size:12px;color:var(--muted)">O admin importa os jogos e o chaveamento aparece aqui automaticamente.</span></p></div>`;
+    return;
+  }
+
+  // Group by phase
+  const byPhase={};
+  KNOCKOUT_PHASES.forEach(p=>{byPhase[p]=[];});
+  koMs.forEach(m=>{if(byPhase[m.phase])byPhase[m.phase].push(m);});
+
+  // Sort each phase by date
+  Object.values(byPhase).forEach(arr=>arr.sort((a,b)=>new Date(a.dt)-new Date(b.dt)));
+
+  const phases=KNOCKOUT_PHASES.filter(p=>byPhase[p].length>0);
+
+  // Group stage summary (top qualifiers)
+  const groups=calcGroupStandings();
+  let groupSummary='';
+  if(Object.keys(groups).length){
+    const rows=Object.entries(groups).sort(([a],[b])=>a.localeCompare(b)).map(([g,teams])=>{
+      const sorted=Object.values(teams).sort((a,b)=>b.pts-a.pts||(b.gf-b.ga)-(a.gf-a.ga)||b.gf-a.gf);
+      const t1=sorted[0],t2=sorted[1];
+      const q1=t1?`<span style="display:inline-flex;align-items:center;gap:4px">${teamFlagImg(t1.name,16)}<span style="font-size:12px">${t1.name}</span></span>`:'—';
+      const q2=t2?`<span style="display:inline-flex;align-items:center;gap:4px">${teamFlagImg(t2.name,16)}<span style="font-size:12px">${t2.name}</span></span>`:'—';
+      return`<div style="display:flex;gap:6px;padding:5px 0;border-bottom:1px solid var(--border);align-items:center;flex-wrap:wrap">
+        <span style="font-size:11px;font-weight:700;color:var(--gold);min-width:60px">${g}</span>
+        <span style="font-size:11px;color:var(--muted);min-width:14px">1°</span>${q1}
+        <span style="font-size:11px;color:var(--muted);margin-left:8px;min-width:14px">2°</span>${q2}
+      </div>`;
+    }).join('');
+    groupSummary=`<div class="rc" style="margin-bottom:14px">
+      <div class="rh">&#128202; Classificados da Fase de Grupos</div>
+      ${rows||'<p style="font-size:13px;color:var(--muted)">Aguardando resultados dos grupos.</p>'}
+    </div>`;
+  }
+
+  // Build bracket columns
+  const cols=phases.map(phase=>{
+    const matches=byPhase[phase];
+    const cards=matches.map(m=>{
+      const fin=isFinished(m);
+      const locked=isLocked(m);
+      const pred=myPred(m.id);
+      const hasPred=pred&&pred.s1!==undefined;
+      const pts=fin&&hasPred?calcPts(pred,m):null;
+
+      let statusBadge='';
+      if(fin) statusBadge=`<span class="badge b-gray" style="font-size:9px">Encerrado</span>`;
+      else if(locked) statusBadge=`<span class="badge b-gold" style="font-size:9px">&#128274; Em breve</span>`;
+      else statusBadge=`<span class="badge b-green" style="font-size:9px">&#9679; Aberto</span>`;
+
+      const ptsBadge=pts!==null?(pts===3?`<span class="badge b-green" style="font-size:9px">+3</span>`:pts>=1?`<span class="badge b-gold" style="font-size:9px">+${pts}</span>`:`<span class="badge b-red" style="font-size:9px">0</span>`):'';
+
+      const t1known=m.t1&&m.t1!=='A definir';
+      const t2known=m.t2&&m.t2!=='A definir';
+      const scoreDisp=fin?`<span style="font-family:'Bebas Neue',sans-serif;font-size:16px">${m.r1} × ${m.r2}</span>`:
+        hasPred?`<span style="font-size:11px;color:var(--muted)">${pred.s1}×${pred.s2}</span>`:'';
+
+      return`<div style="background:var(--bg2);border:1px solid ${fin?'rgba(0,214,126,.25)':t1known?'var(--border)':'rgba(110,142,168,.2)'};border-radius:10px;padding:10px 12px;margin-bottom:8px;${!t1known&&!t2known?'opacity:.55':''}">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:4px;flex-wrap:wrap">
+          ${statusBadge}${ptsBadge}
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <div style="flex:1;text-align:center">
+            ${t1known?teamFlagImg(m.t1,30):'<span style="font-size:22px;display:block;text-align:center">&#10067;</span>'}
+            <p style="font-size:11px;font-weight:700;margin:4px 0 0;line-height:1.2">${m.t1||'Aguardando'}</p>
+          </div>
+          <div style="flex:0;text-align:center;padding:0 4px">
+            ${scoreDisp||'<span style="font-size:13px;color:var(--muted)">×</span>'}
+          </div>
+          <div style="flex:1;text-align:center">
+            ${t2known?teamFlagImg(m.t2,30):'<span style="font-size:22px;display:block;text-align:center">&#10067;</span>'}
+            <p style="font-size:11px;font-weight:700;margin:4px 0 0;line-height:1.2">${m.t2||'Aguardando'}</p>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+
+    return`<div style="flex:1;min-width:140px;max-width:220px">
+      <p style="font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.08em;text-align:center;margin-bottom:10px;padding:4px 8px;background:rgba(245,197,24,.1);border-radius:6px">${PHASE_SHORT[phase]||phase}</p>
+      ${cards}
+    </div>`;
+  }).join(`<div style="width:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><span style="font-size:16px;color:var(--muted)">&#8250;</span></div>`);
+
+  c.innerHTML=groupSummary+
+    `<div style="overflow-x:auto;padding-bottom:8px">
+      <div style="display:flex;gap:0;min-width:max-content;align-items:flex-start">
+        ${cols}
+      </div>
+    </div>`;
 }
 
 // ── GROUP STANDINGS ───────────────────────────────────────────────────────────
@@ -794,6 +935,7 @@ function setupListeners(){
     _matches=snap.val()||{};
     if(currentPage==='jogos')renderMatches();
     if(currentPage==='grupos')renderGrupos();
+    if(currentPage==='chaveamento')renderChaveamento();
     if(currentPage==='ranking')renderRanking();
     if(currentPage==='admin'&&isAdminSession)renderAdminMatches();
   });
@@ -832,6 +974,7 @@ function goPage(id){
   if(id==='inicio')renderInicio();
   if(id==='jogos')renderMatches();
   if(id==='grupos')renderGrupos();
+  if(id==='chaveamento')renderChaveamento();
   if(id==='ranking')renderRanking();
   if(id==='admin')renderAdmin();
 }
@@ -852,9 +995,8 @@ function populateTeamSelects(){
   // Sempre usa COPA_TEAMS — a lista oficial das 48 seleções
   const placeholders={
     'pred-champion':'— escolha o campeão —',
-    'pred-runnerup':'— escolha o vice —',
     'actual-champion':'— campeão real —',
-    'actual-runnerup':'— vice real —'
+    'actual-champion':'— campeão real —'
   };
   Object.entries(placeholders).forEach(([id,ph])=>{
     const el=document.getElementById(id);
@@ -870,53 +1012,40 @@ function renderInicio(){
   populateTeamSelects();
   const fp=_finalPreds[currentUser?.uid];
   const adminLocked=!!_finalResult?.locked;
-  const userLocked=!!(fp?.champion && fp?.locked);   // user already confirmed
-  const hasPred=!!(fp?.champion && fp?.runnerUp);
+  const userLocked=!!(fp?.champion&&fp?.locked);
+  const hasPred=!!fp?.champion;
 
-  // Admin lock banner
   document.getElementById('final-locked-msg').style.display=(adminLocked&&!hasPred)?'':'none';
 
-  if(userLocked){
-    // Permanently confirmed — show result only, no form, no edit
-    document.getElementById('final-pred-form').style.display='none';
-    document.getElementById('saved-champ').textContent=fp.champion;
-    document.getElementById('saved-runner').textContent=fp.runnerUp||'—';
-    document.getElementById('saved-edit-btn').style.display='none';  // hide edit
-    document.getElementById('final-pred-saved').style.display='';
-  } else if(adminLocked){
+  if(userLocked||adminLocked){
     document.getElementById('final-pred-form').style.display='none';
     if(hasPred){
       document.getElementById('saved-champ').textContent=fp.champion;
-      document.getElementById('saved-runner').textContent=fp.runnerUp||'—';
-      document.getElementById('saved-edit-btn').style.display='none';
-      document.getElementById('final-pred-saved').style.display='';
-    } else {
+      document.getElementById('saved-champ-flag').innerHTML=teamFlagImg(fp.champion,36);
+      document.getElementById('final-pred-saved').style.display='flex';
+    }else{
       document.getElementById('final-pred-saved').style.display='none';
     }
-  } else {
-    // Open — show form if not yet confirmed
+  }else{
     document.getElementById('final-pred-form').style.display='';
     if(hasPred){
       const cs=document.getElementById('pred-champion');
-      const rs=document.getElementById('pred-runnerup');
-      if(cs)cs.value=fp.champion; if(rs)rs.value=fp.runnerUp||'';
+      if(cs)cs.value=fp.champion;
       document.getElementById('saved-champ').textContent=fp.champion;
-      document.getElementById('saved-runner').textContent=fp.runnerUp||'—';
-      document.getElementById('saved-edit-btn').style.display='none'; // no edit even before admin lock
-      document.getElementById('final-pred-saved').style.display='';
-    } else {
+      document.getElementById('saved-champ-flag').innerHTML=teamFlagImg(fp.champion,36);
+      document.getElementById('final-pred-saved').style.display='flex';
+    }else{
       document.getElementById('final-pred-saved').style.display='none';
     }
   }
-
   updateNavGate();
 }
 
 function updateNavGate(){
   const fp=_finalPreds[currentUser?.uid];
-  const hasPred=!!(fp?.champion && fp?.runnerUp);
+  const hasPred=!!fp?.champion;
   // Gate regular tabs
-  ['jogos','ranking','grupos','regras'].forEach(p=>{
+  ['jogos','grupos','chaveamento','ranking','regras'].forEach(p=>{
     const nb=document.getElementById('nb-'+p);
     if(!nb)return;
     nb.style.opacity=hasPred?'1':'0.35';
@@ -935,35 +1064,30 @@ function editFinalPred(){/* desabilitado — palpite não pode ser alterado */}
 
 async function saveFinalPred(){
   const champ=document.getElementById('pred-champion')?.value;
-  const runner=document.getElementById('pred-runnerup')?.value;
-  if(!champ||!runner){toast('Escolha o campeão e o vice-campeão!','t-err');return;}
-  if(champ===runner){toast('Campeão e vice não podem ser o mesmo time!','t-err');return;}
-  // Confirm before locking permanently
-  if(!confirm('Atenção: após confirmar, seu palpite dos finalistas não poderá ser alterado.\n\nCampeão: '+champ+'\nVice: '+runner+'\n\nConfirmar?'))return;
+  if(!champ){toast('Escolha o campeão!','t-err');return;}
+  if(!confirm('Atenção: após confirmar, sua escolha não poderá ser alterada.\n\nCampeão: '+champ+'\n\nConfirmar?'))return;
   const btn=document.querySelector('#final-pred-form .save-btn');
   if(btn){btn.disabled=true;btn.textContent='Confirmando...';}
   try{
-    const pred={champion:champ,runnerUp:runner,locked:true,savedAt:Date.now()};
+    const pred={champion:champ,locked:true,savedAt:Date.now()};
     await db.ref('finalPreds/'+currentUser.uid).set(pred);
     _finalPreds[currentUser.uid]=pred;
     document.getElementById('saved-champ').textContent=champ;
-    document.getElementById('saved-runner').textContent=runner;
-    document.getElementById('saved-edit-btn').style.display='none';
-    document.getElementById('final-pred-saved').style.display='';
+    document.getElementById('saved-champ-flag').innerHTML=teamFlagImg(champ,36);
+    document.getElementById('final-pred-saved').style.display='flex';
     document.getElementById('final-pred-form').style.display='none';
-    toast('Palpite confirmado e bloqueado! ✓');
+    toast('Campeão confirmado e bloqueado! ✓');
     updateNavGate();
   }catch(e){
     toast('Erro: '+e.message,'t-err');
-    if(btn){btn.disabled=false;btn.textContent='Confirmar palpite dos finalistas';}
+    if(btn){btn.disabled=false;btn.textContent='Confirmar campeão';}
   }
 }
 
 function calcFinalBonus(uid){
   const fp=_finalPreds[uid];const fr=_finalResult;
-  if(!fp||!fr?.champion||!fr?.runnerUp)return 0;
-  const ca=fp.champion===fr.champion,rb=fp.runnerUp===fr.runnerUp;
-  if(ca&&rb)return 60;if(ca||rb)return 40;return 0;
+  if(!fp||!fr?.champion)return 0;
+  return fp.champion===fr.champion?30:0;
 }
 
 // ══ GAME LOGIC ════════════════════════════════════════
@@ -1048,27 +1172,39 @@ function buildCard(m){
     const s1=pred?.s1??'',s2=pred?.s2??'';
     let qs='';
     if(m.type==='elim'){const qv=pred?.clf||'';qs=`<select class="qsel" id="q_${m.id}"><option value="">🏆 Quem classifica?</option><option value="${m.t1}" ${qv===m.t1?'selected':''}>${m.t1}</option><option value="${m.t2}" ${qv===m.t2?'selected':''}>${m.t2}</option></select>`;}
-    center=`<div class="sinputs"><input class="si" type="number" id="s1_${m.id}" min="0" max="20" placeholder="0" value="${s1}"/><span class="si-sep">×</span><input class="si" type="number" id="s2_${m.id}" min="0" max="20" placeholder="0" value="${s2}"/></div>${qs}<button class="save-btn" id="btn_${m.id}" onclick="savePred('${m.id}')">Salvar palpite</button>`;
+    const hasSaved=pred&&pred.s1!==undefined;
+    const stHtml=hasSaved?'<span style="color:var(--green);font-size:11px">&#10003; salvo</span>':'<span style="color:var(--muted);font-size:11px">&#128393; auto-salva ao digitar</span>';
+    center=`<div class="sinputs"><input class="si" type="number" id="s1_${m.id}" min="0" max="20" placeholder="0" value="${s1}" oninput="autoSave('${m.id}')"/><span class="si-sep">×</span><input class="si" type="number" id="s2_${m.id}" min="0" max="20" placeholder="0" value="${s2}" oninput="autoSave('${m.id}')"/></div>${qs}<div style="text-align:center;margin-top:6px" id="st_${m.id}">${stHtml}</div>`;
   }
   return `<div class="${cls}"><div class="mc-top"><div style="display:flex;align-items:center;flex-wrap:wrap;gap:5px">${metaL}${ptsB}</div>${metaR}</div><div class="mc-teams"><div class="team">${teamFlagImg(m.t1)}<div class="team-name">${m.t1}</div></div><div class="vs">${center}</div><div class="team">${teamFlagImg(m.t2)}<div class="team-name">${m.t2}</div></div></div></div>`;
+}
+
+const _autoTimers={};
+function autoSave(mid){
+  const m=_matches[mid];
+  if(!m||isLocked(m))return;
+  clearTimeout(_autoTimers[mid]);
+  const st=document.getElementById('st_'+mid);
+  if(st){st.innerHTML='<span style="color:var(--muted);font-size:11px">&#8987; salvando...</span>';}
+  _autoTimers[mid]=setTimeout(()=>savePred(mid),1500);
 }
 
 async function savePred(mid){
   const s1v=document.getElementById('s1_'+mid)?.value;
   const s2v=document.getElementById('s2_'+mid)?.value;
-  if(s1v===''||s2v===''){toast('Preencha o placar!','t-err');return;}
+  if(s1v===''||s2v==='')return;
   const clf=document.getElementById('q_'+mid)?.value||null;
-  const btn=document.getElementById('btn_'+mid);
-  btn.disabled=true;btn.textContent='Salvando...';
+  const st=document.getElementById('st_'+mid);
   try{
     const pred={s1:+s1v,s2:+s2v};if(clf)pred.clf=clf;
     await db.ref(`preds/${currentUser.uid}/${mid}`).set(pred);
     if(!_preds[currentUser.uid])_preds[currentUser.uid]={};
     _preds[currentUser.uid][mid]=pred;
-    btn.textContent='✓ Salvo!';btn.classList.add('ok2');
-    toast('Palpite salvo! ✓');
-    setTimeout(()=>{btn.textContent='Salvar palpite';btn.classList.remove('ok2');btn.disabled=false;},2000);
-  }catch(e){toast('Erro: '+e.message,'t-err');btn.disabled=false;btn.textContent='Salvar palpite';}
+    if(st)st.innerHTML='<span style="color:var(--green);font-size:11px">&#10003; salvo</span>';
+  }catch(e){
+    if(st)st.innerHTML='<span style="color:var(--red);font-size:11px">&#10007; erro</span>';
+    toast('Erro ao salvar: '+e.message,'t-err');
+  }
 }
 
 // ══ RANKING ══════════════════════════════════════════
@@ -1080,7 +1216,10 @@ function renderRanking(){
   document.getElementById('ranking-container').innerHTML=users.length?users.map((u,i)=>{
     const isMe=currentUser&&u.uid===currentUser.uid;
     const pct=Math.round(u.total/max*100);
-    return `<div class="rk-row ${isMe?'me':''} ${i===0?'top1':''}"><span class="rk-pos">${i<3?medals[i]:(i+1)+'°'}</span><div style="flex:1;min-width:0"><div class="rk-name">${u.name||u.email}${isMe?' <span style="font-size:11px;color:var(--green)">(você)</span>':''}</div><div class="rk-det">${u.exact} exatos · ${u.win} vencedor · ${u.qual} classif.${u.bonus>0?` · <span style="color:var(--gold)">+${u.bonus} finalistas</span>`:''}</div><div class="rk-bar"><div class="rk-fill" style="width:${pct}%"></div></div></div><span class="rk-pts">${u.total}<small> pts</small></span></div>`;
+    const fp2=_finalPreds[u.uid];
+    const champFlag=fp2?.champion?`<span style="display:inline-flex;align-items:center;margin-left:5px;vertical-align:middle" title="Campeão: ${fp2.champion}">${teamFlagImg(fp2.champion,20)}</span>`:'';
+    const bonusTxt=u.bonus>0?' · <span style="color:var(--gold)">+30 pts ✓</span>':'';
+    return `<div class="rk-row ${isMe?'me':''} ${i===0?'top1':''}"><span class="rk-pos">${i<3?medals[i]:(i+1)+'°'}</span><div style="flex:1;min-width:0"><div class="rk-name" style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">${u.name||u.email}${champFlag}${isMe?' <span style="font-size:11px;color:var(--green)">(você)</span>':''}</div><div class="rk-det">${u.exact} exatos · ${u.win} vencedor · ${u.qual} classif.${bonusTxt}</div><div class="rk-bar"><div class="rk-fill" style="width:${pct}%"></div></div></div><span class="rk-pts">${u.total}<small> pts</small></span></div>`;
   }).join(''):'<div class="empty"><div class="empty-ico">🏆</div><p>Nenhum resultado lançado ainda.</p></div>';
 }
 
@@ -1100,12 +1239,10 @@ async function resetFinalistPred(){
 
 async function saveFinalResult(){
   const champ=document.getElementById('actual-champion')?.value;
-  const runner=document.getElementById('actual-runnerup')?.value;
-  if(!champ||!runner){toast('Escolha campeão e vice reais!','t-err');return;}
-  if(champ===runner){toast('Não podem ser o mesmo time!','t-err');return;}
+  if(!champ){toast('Escolha o campeão real!','t-err');return;}
   const locked=!!_finalResult?.locked;
-  await db.ref('finalResult').set({champion:champ,runnerUp:runner,locked,savedAt:Date.now()});
-  toast('Resultado dos finalistas salvo! ✓');
+  await db.ref('finalResult').set({champion:champ,locked,savedAt:Date.now()});
+  toast('Campeão real salvo! Rankings atualizados. ✓');
 }
 
 async function toggleFinalLock(val){await db.ref('finalResult/locked').set(val);toast(val?'Palpites bloqueados.':'Palpites desbloqueados.');}
@@ -1113,12 +1250,11 @@ async function toggleFinalLock(val){await db.ref('finalResult/locked').set(val);
 function renderAdmin(){
   if(!isAdminSession)return;
   populateTeamSelects();
-  const ac=document.getElementById('actual-champion'),ar=document.getElementById('actual-runnerup');
+  const ac=document.getElementById('actual-champion');
   const lk=document.getElementById('final-lock-cb'),rd=document.getElementById('final-result-display');
   if(ac&&_finalResult?.champion)ac.value=_finalResult.champion;
-  if(ar&&_finalResult?.runnerUp)ar.value=_finalResult.runnerUp;
   if(lk)lk.checked=!!_finalResult?.locked;
-  if(rd)rd.textContent=_finalResult?.champion?`Resultado: ${_finalResult.champion} (campeão) × ${_finalResult.runnerUp} (vice)`:'Nenhum resultado configurado ainda.';
+  if(rd)rd.textContent=_finalResult?.champion?`Campeão real: ${_finalResult.champion}`:'Nenhum campeão configurado ainda.';
   // Populate reset user select
   const rus=document.getElementById('reset-user-sel');
   if(rus){
