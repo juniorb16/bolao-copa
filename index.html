@@ -1163,15 +1163,32 @@ function buildCard(m){
     const pp=pred&&pred.s1!==undefined;const pts=pp?calcPts(pred,m):0;
     const hc=pts===3?'ok':pts>=1?'pt':'';
     center=`<p class="score-display">${m.r1} × ${m.r2}</p><p class="score-hint ${hc}">${pp?`Palpite: ${pred.s1}×${pred.s2}`:'Sem palpite'}</p>`;
-    if(m.type==='elim'&&getWinner(m)){const qok=pp&&pred.clf===getWinner(m);center+=`<p class="score-hint ${qok?'ok':''}" style="margin-top:2px">Classif.: ${getWinner(m)} ${qok?'✓ +2pts':pp&&pred.clf?'· você: '+pred.clf:''}</p>`;}
+    if(m.type==='elim'&&getWinner(m)){
+      const qok=pp&&pred.clf===getWinner(m);
+      const isFinal3=m.phase==='Final';
+      const is3rd3=m.phase==='3º Lugar'||m.phase==='3° Lugar'||m.phase==='3º Lugar';
+      const lbl3=isFinal3?'Campeão':is3rd3?'3º lugar':'Classif.';
+      center+=`<p class="score-hint ${qok?'ok':''}" style="margin-top:2px">${lbl3}: ${getWinner(m)} ${qok?'✓ +2pts':pp&&pred.clf?'· você: '+pred.clf:''}</p>`;
+    }
   }else if(locked){
     const s1=pred?pred.s1??'?':'?',s2=pred?pred.s2??'?':'?';
     center=`<div class="sinputs"><div class="lbox">${s1}</div><span class="si-sep">×</span><div class="lbox">${s2}</div></div><p class="score-hint" style="margin-top:6px">${pred?'salvo · bloqueado':'sem palpite'}</p>`;
-    if(m.type==='elim'&&pred?.clf)center+=`<p class="score-hint" style="margin-top:2px">Classif.: ${pred.clf}</p>`;
+    if(m.type==='elim'&&pred?.clf){
+      const isFinal2=m.phase==='Final';
+      const is3rd2=m.phase==='3º Lugar'||m.phase==='3° Lugar'||m.phase==='3º Lugar';
+      const lbl=isFinal2?'Campeão':is3rd2?'3º lugar':'Classif.';
+      center+=`<p class="score-hint" style="margin-top:2px">${lbl}: ${pred.clf}</p>`;
+    }
   }else{
     const s1=pred?.s1??'',s2=pred?.s2??'';
     let qs='';
-    if(m.type==='elim'){const qv=pred?.clf||'';qs=`<select class="qsel" id="q_${m.id}"><option value="">🏆 Quem classifica?</option><option value="${m.t1}" ${qv===m.t1?'selected':''}>${m.t1}</option><option value="${m.t2}" ${qv===m.t2?'selected':''}>${m.t2}</option></select>`;}
+    if(m.type==='elim'){
+      const qv=pred?.clf||'';
+      const isFinal=m.phase==='Final';
+      const is3rd=m.phase==='3º Lugar'||m.phase==='3° Lugar';
+      const qLabel=isFinal?'🏆 Quem será o Campeão?':is3rd?'🥉 Quem ficará em 3º lugar?':'🏆 Quem classifica?';
+      qs=`<select class="qsel" id="q_${m.id}" onchange="autoSave('${m.id}')"><option value="">${qLabel}</option><option value="${m.t1}" ${qv===m.t1?'selected':''}>${m.t1}</option><option value="${m.t2}" ${qv===m.t2?'selected':''}>${m.t2}</option></select>`;
+    }}
     const hasSaved=pred&&pred.s1!==undefined;
     const stHtml=hasSaved?'<span style="color:var(--green);font-size:11px">&#10003; salvo</span>':'<span style="color:var(--muted);font-size:11px">&#128393; auto-salva ao digitar</span>';
     center=`<div class="sinputs"><input class="si" type="number" id="s1_${m.id}" min="0" max="20" placeholder="0" value="${s1}" oninput="autoSave('${m.id}')"/><span class="si-sep">×</span><input class="si" type="number" id="s2_${m.id}" min="0" max="20" placeholder="0" value="${s2}" oninput="autoSave('${m.id}')"/></div>${qs}<div style="text-align:center;margin-top:6px" id="st_${m.id}">${stHtml}</div>`;
