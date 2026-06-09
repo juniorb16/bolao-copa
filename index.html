@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Bolão Copa 2026</title>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
@@ -15,9 +15,9 @@ html,body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text)
 body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,214,126,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,214,126,.025) 1px,transparent 1px);background-size:64px 64px;pointer-events:none;z-index:0}
 .pg{display:none;position:relative;z-index:1}
 .pg.on{display:flex;flex-direction:column}
-#pg-login.on{min-height:100vh;align-items:center;justify-content:center;padding:20px}
+#pg-login.on{min-height:100vh;align-items:center;justify-content:center;padding:20px;flex-direction:column}
 #pg-app.on{min-height:100vh}
-.auth-wrap{width:100%;max-width:430px}
+.auth-wrap{width:100%;max-width:430px;margin:0 auto}
 .auth-ball{font-size:56px;display:block;text-align:center;animation:bounce 2s ease-in-out infinite}
 @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
 .auth-title{font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:3px;text-align:center;background:linear-gradient(135deg,var(--gold),#fff 50%,var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-top:8px}
@@ -42,7 +42,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .msg-err{background:rgba(231,76,60,.12);border:1px solid rgba(231,76,60,.3);color:var(--red)}
 .msg-ok{background:rgba(0,214,126,.1);border:1px solid rgba(0,214,126,.3);color:var(--green)}
 .msg-info{background:rgba(58,155,213,.1);border:1px solid rgba(58,155,213,.3);color:var(--blue)}
-.header{background:rgba(13,30,48,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:200;flex-shrink:0}
+.header{background:rgba(13,30,48,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;position:sticky;top:0;z-index:200;flex-shrink:0}
 .h-logo{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--gold)}
 .h-logo em{color:var(--green);font-style:normal}
 .h-right{display:flex;align-items:center;gap:8px}
@@ -51,7 +51,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .h-adm{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;background:rgba(245,197,24,.15);color:var(--gold);flex-shrink:0}
 .btn-sm{background:none;border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:7px;font-size:12px;cursor:pointer;font-family:'Barlow',sans-serif;transition:.2s}
 .btn-sm:hover{border-color:var(--red);color:var(--red)}
-.nav{background:var(--bg2);border-bottom:1px solid var(--border);display:flex;padding:0 16px;overflow-x:auto;flex-shrink:0}
+.nav{background:var(--bg2);border-bottom:1px solid var(--border);display:flex;padding:0 8px;overflow-x:auto;flex-shrink:0;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 .nav::-webkit-scrollbar{display:none}
 .nb{background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);padding:11px 14px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Barlow',sans-serif;transition:.2s;margin-bottom:-1px}
 .nb:hover{color:var(--text)}
@@ -194,7 +194,40 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .gt-legend i{width:3px;height:14px;border-radius:1px;display:inline-block}
 .flag-img{width:46px;height:30px;object-fit:cover;border-radius:3px;display:block;margin:0 auto;box-shadow:0 1px 3px rgba(0,0,0,.35)}
 input[type=datetime-local]{color-scheme:dark}
-@media(max-width:480px){.fg{grid-template-columns:1fr}.pts-strip{grid-template-columns:1fr}.h-name{display:none}}
+@media(max-width:600px){
+  .fg{grid-template-columns:1fr}
+  .pts-strip{grid-template-columns:1fr 1fr 1fr}
+  .h-name{max-width:80px;font-size:12px}
+  .content{padding:12px 10px}
+  .card{padding:14px 12px}
+  .mc{padding:10px 12px}
+  .team-name{font-size:12px}
+  .rk-pts{font-size:20px}
+  .rk-name{font-size:13px}
+  .auth-wrap{padding:0}
+  .auth-title{font-size:32px}
+  .nb{padding:9px 10px;font-size:12px}
+  .sinputs{gap:5px}
+  .si{width:40px;height:38px;font-size:16px}
+  .score-display{font-size:22px}
+  .gt th,.gt td{padding:5px 4px;font-size:11px}
+  .gt td:nth-child(2){padding-left:4px}
+  .btn-add,.btn-api{padding:8px 12px;font-size:12px}
+  .flag-img{width:36px;height:24px}
+  .h-adm{display:none}
+  .welcome{padding:12px 14px;gap:10px}
+  .welcome-ico{font-size:24px}
+  .welcome h2{font-size:14px}
+  .welcome p{font-size:11px}
+}
+@media(max-width:380px){
+  .nb{padding:8px 8px;font-size:11px}
+  .h-logo{font-size:16px}
+  .auth-title{font-size:26px}
+  .pts-strip{grid-template-columns:1fr 1fr 1fr}
+  .pv{font-size:20px}
+  .pl{font-size:10px}
+}
 </style>
 </head>
 <body>
@@ -1188,7 +1221,7 @@ function buildCard(m){
       const is3rd=m.phase==='3º Lugar'||m.phase==='3° Lugar';
       const qLabel=isFinal?'🏆 Quem será o Campeão?':is3rd?'🥉 Quem ficará em 3º lugar?':'🏆 Quem classifica?';
       qs=`<select class="qsel" id="q_${m.id}" onchange="autoSave('${m.id}')"><option value="">${qLabel}</option><option value="${m.t1}" ${qv===m.t1?'selected':''}>${m.t1}</option><option value="${m.t2}" ${qv===m.t2?'selected':''}>${m.t2}</option></select>`;
-    }}
+    }
     const hasSaved=pred&&pred.s1!==undefined;
     const stHtml=hasSaved?'<span style="color:var(--green);font-size:11px">&#10003; salvo</span>':'<span style="color:var(--muted);font-size:11px">&#128393; auto-salva ao digitar</span>';
     center=`<div class="sinputs"><input class="si" type="number" id="s1_${m.id}" min="0" max="20" placeholder="0" value="${s1}" oninput="autoSave('${m.id}')"/><span class="si-sep">×</span><input class="si" type="number" id="s2_${m.id}" min="0" max="20" placeholder="0" value="${s2}" oninput="autoSave('${m.id}')"/></div>${qs}<div style="text-align:center;margin-top:6px" id="st_${m.id}">${stHtml}</div>`;
