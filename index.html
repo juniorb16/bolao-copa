@@ -1327,10 +1327,12 @@ const OF_URL='https://raw.githubusercontent.com/openfootball/worldcup.json/maste
 function parseOFTime(date,time){
   if(!time)return date+'T20:00:00Z';
   const parts=time.split(' ');
-  const [h,m]=parts[0].split(':').map(Number);
+  const [h,min]=parts[0].split(':').map(Number);
   const tzOff=parts[1]?parseInt(parts[1].replace('UTC',''))||0:0;
-  const utcH=((h-tzOff)%24+24)%24;
-  return date+'T'+String(utcH).padStart(2,'0')+':'+String(m||0).padStart(2,'0')+':00Z';
+  // Use Date object to handle day rollover automatically
+  const base=new Date(date+'T00:00:00Z');
+  base.setUTCHours(h-tzOff, min||0, 0, 0);
+  return base.toISOString().replace(/\.\d{3}Z$/,'Z');
 }
 
 function parseOFPhase(round,group){
