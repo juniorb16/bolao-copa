@@ -943,7 +943,7 @@ async function doForgot(){
   }catch(e){showLoginMsg(fbErr(e));}
 }
 
-async function doLogout(){isAdminSession=false;await auth.signOut();}
+async function doLogout(){isAdminSession=false;if(_lockChecker)clearInterval(_lockChecker);await auth.signOut();}
 
 function togglePass(id,btn){const i=document.getElementById(id);i.type=i.type==='password'?'text':'password';btn.textContent=i.type==='password'?'👁':'🙈';}
 
@@ -958,6 +958,7 @@ function enterApp(){
   document.getElementById('nb-admin').style.display='block';
   document.getElementById('wc-title').textContent='Olá, '+name.split(' ')[0]+'! 🎯';
   setupListeners();
+  startLockChecker();
   goPage('inicio');
   // gate is applied in renderInicio via updateNavGate
 }
@@ -1494,6 +1495,25 @@ function renderAdminUsers(){
     const t=calcUserTotal(uid);
     return`<div class="adm-row"><div class="ari"><strong>${u.name||u.email}</strong><span>${u.email||''} · ${t.total} pts</span></div><button class="del-btn" onclick="delUser('${uid}')">✕ remover</button></div>`;
   }).join('')||'<p style="font-size:13px;color:var(--muted)">Nenhum participante ainda.</p>';
+}
+
+// ══ AUTO-LOCK CHECKER ════════════════════════════════
+let _lockChecker=null;
+function startLockChecker(){
+  if(_lockChecker)clearInterval(_lockChecker);
+  _lockChecker=setInterval(()=>{
+    const now=Date.now();
+    const justLocked=Object.values(_matches).some(m=>{
+      if(isFinished(m))return false;
+      const lockAt=new Date(m.dt).getTime()-3600000;
+      return now>=lockAt&&now<lockAt+35000;
+    });
+    const everyMinute=Math.floor(now/60000)!==Math.floor((now-30000)/60000);
+    if((justLocked||everyMinute)&&currentPage==='jogos'){
+      renderMatches();
+      if(justLocked)toast('🔒 Palpite bloqueado automaticamente!','t-info');
+    }
+  },30000);
 }
 
 // ══ TOAST ════════════════════════════════════════════
