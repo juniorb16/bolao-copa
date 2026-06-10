@@ -462,7 +462,7 @@ input[type=datetime-local]{color-scheme:dark}
       <div class="ac">
         <div class="ah">&#127942; Resultado dos Finalistas</div>
         <div style="background:rgba(245,197,24,.07);border:1px solid rgba(245,197,24,.2);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--gold);margin-bottom:14px">
-          Configure após o término da Copa. Os pontos bônus (+60/+40) são calculados automaticamente no ranking.
+          Configure após o término da Copa. Quem acertou o campeão recebe +30 pts automaticamente no ranking.
         </div>
         <div style="margin-bottom:14px">
           <div class="ff"><label>&#129351; Campeão real da Copa 2026</label>
@@ -470,7 +470,10 @@ input[type=datetime-local]{color-scheme:dark}
           </div>
         </div>
         <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-          <button class="btn-add" style="margin-top:0" onclick="saveFinalResult()">&#128190; Salvar resultado final</button>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+            <button class="btn-add" style="margin-top:0" onclick="saveFinalResult()">&#128190; Salvar resultado final</button>
+            <button class="btn-api" style="margin-top:0;border-color:rgba(231,76,60,.3);color:var(--red)" onclick="clearFinalResult()">&#128465; Limpar resultado</button>
+          </div>
           <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
             <input type="checkbox" id="final-lock-cb" onchange="toggleFinalLock(this.checked)" style="width:16px;height:16px;accent-color:var(--gold)"/>
             <span style="color:var(--muted)">Bloquear palpites dos finalistas</span>
@@ -1286,6 +1289,16 @@ async function resetFinalistPred(){
   await db.ref('finalPreds/'+uid).remove();
   toast('Palpite resetado. O participante pode escolher novamente.');
   renderAdmin();
+}
+
+async function clearFinalResult(){
+  if(!confirm('Limpar o campeão real? Os +30 pts serão removidos do ranking de todos.'))return;
+  await db.ref('finalResult').remove();
+  const ac=document.getElementById('actual-champion');
+  if(ac)ac.value='';
+  const rd=document.getElementById('final-result-display');
+  if(rd)rd.textContent='Nenhum campeão configurado ainda.';
+  toast('Resultado limpo. Ranking atualizado.');
 }
 
 async function saveFinalResult(){
