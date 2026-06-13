@@ -1445,45 +1445,86 @@ async function importMatches(){
   }catch(e){setProgress(-1);setDot('err','✗ '+e.message);toast('Erro: '+e.message,'t-err');}
 }
 
+// Match team name between APIs using normTeam
+function findMatchByTeams(t1, t2){
+  const n1=normTeam(t1), n2=normTeam(t2);
+  return Object.values(_matches).find(m=>{
+    const m1=normTeam(m.t1), m2=normTeam(m.t2);
+    return (m1===n1&&m2===n2)||(m1===n2&&m2===n1);
+  });
+}
+
 async function syncResults(){
   setDot('idle','Sincronizando resultados...');setProgress(10);
   toast('Buscando resultados atualizados...','t-info');
   try{
-    // Tenta openfootball (atualiza scores após cada jogo)
     let updated=0;
+    const updates={};
+
+    // ── Fonte 1: worldcup26.ir (gratuita, sem chave, Copa 2026 em tempo real) ──
     try{
-      const res=await fetch(OF_URL);
-      if(!res.ok)throw new Error('openfootball '+res.status);
-      setProgress(50);
+      setDot('idle','Tentando worldcup26.ir...');
+      const res=await fetch('https://worldcup26.ir/get/games');
+      if(!res.ok)throw new Error('worldcup26.ir '+res.status);
+      setProgress(40);
       const data=await res.json();
-      const ms=Object.values(_matches);
-      const updates={};
-      (data.matches||[]).forEach((m,i)=>{
-        if(m.score1!=null&&m.score2!=null){
-          const local=ms.find(x=>x.apiId==='of_'+i);
-          if(local){updates[`matches/${local.id}/r1`]=m.score1;updates[`matches/${local.id}/r2`]=m.score2;updated++;}
+      (data.games||[]).forEach(g=>{
+        // Só atualiza se o jogo está finalizado E a API tem placar
+        if(g.finished!=='TRUE'&&g.time_elapsed!=='FT')return;
+        const r1=parseInt(g.home_score),r2=parseInt(g.away_score);
+        if(isNaN(r1)||isNaN(r2))return;
+        const match=findMatchByTeams(g.home_team_name_en,g.away_team_name_en);
+        if(!match)return;
+        // PRESERVA placar manual: só sobrescreve se ainda não tem placar OU API é mais recente
+        // Regra: se já tem placar manual (r1!=null), mantém; se não tem, usa da API
+        if(match.r1==null||match.r2==null){
+          updates[`matches/${match.id}/r1`]=r1;
+          updates[`matches/${match.id}/r2`]=r2;
+          updated++;
         }
       });
-      if(updated>0)await db.ref().update(updates);
-    }catch(ofErr){
-      // Fallback: football-data.org
-      const key=document.getElementById('api-key').value.trim();
-      if(!key)throw new Error('Sem conexão. Configure a chave do football-data.org para sincronizar.');
-      const res=await fetch('https://api.football-data.org/v4/competitions/WC/matches?status=FINISHED',{headers:{'X-Auth-Token':key}});
-      setProgress(55);const data=await res.json();
-      if(!res.ok)throw new Error(data.message||'Erro '+res.status);
-      const updates2={};
-      (data.matches||[]).forEach(m=>{
-        const k='fd_'+m.id;
-        if(_matches[k]){updates2[`matches/${k}/r1`]=m.score.fullTime.home;updates2[`matches/${k}/r2`]=m.score.fullTime.away;updated++;}
-      });
-      if(updated>0)await db.ref().update(updates2);
+      setProgress(70);
+      setDot('ok','worldcup26.ir ✓');
+    }catch(wErr){
+      console.warn('worldcup26.ir falhou:',wErr.message);
+      // ── Fonte 2: openfootball (fallback) ──────────────────────────────────────
+      try{
+        const res2=await fetch(OF_URL);
+        if(!res2.ok)throw new Error('openfootball '+res2.status);
+        setProgress(50);
+        const data2=await res2.json();
+        const ms=Object.values(_matches);
+        (data2.matches||[]).forEach((m,i)=>{
+          if(m.score1==null||m.score2==null)return;
+          const local=ms.find(x=>x.apiId==='of_'+i);
+          if(!local||local.r1!=null)return; // preserva placar já existente
+          updates[`matches/${local.id}/r1`]=m.score1;
+          updates[`matches/${local.id}/r2`]=m.score2;
+          updated++;
+        });
+      }catch(ofErr){
+        // ── Fonte 3: football-data.org (último fallback) ────────────────────────
+        const key=document.getElementById('api-key').value.trim();
+        if(!key)throw new Error('Nenhuma fonte disponível. Tente mais tarde ou cole a chave do football-data.org.');
+        const res3=await fetch('https://api.football-data.org/v4/competitions/WC/matches?status=FINISHED',{headers:{'X-Auth-Token':key}});
+        setProgress(55);const data3=await res3.json();
+        if(!res3.ok)throw new Error(data3.message||'Erro '+res3.status);
+        (data3.matches||[]).forEach(m=>{
+          const k='fd_'+m.id;
+          if(!_matches[k]||_matches[k].r1!=null)return; // preserva placar já existente
+          updates[`matches/${k}/r1`]=m.score.fullTime.home;
+          updates[`matches/${k}/r2`]=m.score.fullTime.away;
+          updated++;
+        });
+      }
     }
+
+    if(Object.keys(updates).length>0)await db.ref().update(updates);
     setProgress(100);setTimeout(()=>setProgress(-1),800);
     const now=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
     document.getElementById('api-sync').textContent='Sync às '+now;
     setDot('ok',`✓ ${updated} resultado(s) atualizados`);
-    toast(`✓ ${updated} resultado(s) sincronizados!`);
+    toast(updated>0?`✓ ${updated} resultado(s) sincronizados!`:'Nenhum resultado novo para sincronizar.');
   }catch(e){setProgress(-1);setDot('err','✗ '+e.message);toast('Erro: '+e.message,'t-err');}
 }
 
