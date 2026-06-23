@@ -577,7 +577,7 @@ const ADMIN_HASH = 'db6f20ac0787ad306f4df4efbe6e21586b7dfeea039582cd67a9fb4a4a8c
 
 // ══ STATE ════════════════════════════════════════════
 let auth, db, currentUser=null, userProfile=null, isAdminSession=false;
-let _matches={}, _preds={}, _users={}, _finalPreds={}, _finalResult={};
+let _matches={}, _preds={}, _users={}, _finalPreds={}, _finalResult={}, _adminUnlocks={};
 let currentPage='inicio';
 const PAGES=['inicio','jogos','grupos','chaveamento','ranking','regras','admin'];
 
@@ -986,6 +986,11 @@ function setupListeners(){
     if(currentPage==='ranking')renderRanking();
     if(currentPage==='admin'&&isAdminSession)renderAdminUsers();
   });
+  db.ref('adminUnlocks').on('value',snap=>{
+    _adminUnlocks=snap.val()||{};
+    if(currentPage==='jogos')renderMatches();
+    if(currentPage==='admin'&&isAdminSession)renderAdminMatches();
+  });
   db.ref('finalPreds').on('value',snap=>{
     _finalPreds=snap.val()||{};
     if(currentPage==='inicio')renderInicio();
@@ -1129,7 +1134,19 @@ function calcFinalBonus(uid){
 
 // ══ GAME LOGIC ════════════════════════════════════════
 const isFinished=m=>m.r1!=null&&m.r2!=null;
-const isLocked=m=>Date.now()>=new Date(m.dt).getTime()-3600000;
+const hasStarted=m=>Date.now()>=new Date(m.dt).getTime();
+const isLockedForUser=(m,uid)=>{
+  // Admin desbloqueou especificamente este usuário neste jogo?
+  if(_adminUnlocks[m.id]&&_adminUnlocks[m.id][uid]===true)return false;
+  // Jogo já começou → bloqueado (exceto unlock acima)
+  if(hasStarted(m))return true;
+  // Override manual do admin para todos
+  if(m.adminLock===true)return true;
+  if(m.adminLock===false)return false;
+  // Regra automática: 1h antes
+  return Date.now()>=new Date(m.dt).getTime()-3600000;
+};
+const isLocked=m=>isLockedForUser(m, currentUser?.uid||'');
 const myPred=mid=>_preds[currentUser?.uid]?.[mid]||null;
 
 function getWinner(m){
@@ -1203,7 +1220,8 @@ function buildCard(m){
   }else if(locked){
     const ms2=new Date(m.dt).getTime()-Date.now();
     const lbl=ms2<0?'em andamento':`começa em ${ms2<3600000?Math.ceil(ms2/60000)+'min':Math.ceil(ms2/3600000)+'h'}`;
-    metaL=`<span style="font-size:11px;font-weight:700;color:var(--gold)">🔒 BLOQUEADO · ${lbl}</span>`;
+    const adminTag=m.adminLock===true?' <span style="font-size:9px;background:rgba(245,197,24,.2);color:var(--gold);padding:1px 6px;border-radius:10px;vertical-align:middle">ADM</span>':m.adminLock===false?' <span style="font-size:9px;background:rgba(0,214,126,.2);color:var(--green);padding:1px 6px;border-radius:10px;vertical-align:middle">ADM↑</span>':'';
+  metaL=`<span style="font-size:11px;font-weight:700;color:var(--gold)">🔒 BLOQUEADO · ${lbl}</span>${adminTag}`;
   }else{
     const msL=new Date(m.dt).getTime()-3600000-Date.now();
     const hL=Math.floor(msL/3600000),dL=Math.floor(hL/24);
@@ -1553,6 +1571,34 @@ async function setResult(mid){
 }
 
 async function delMatch(id){if(!confirm('Remover esta partida?'))return;await db.ref('matches/'+id).remove();toast('Partida removida.');}
+
+async function adminUnlockUser(matchId, uid){
+  if(!matchId||!uid){toast('Selecione um jogo e um participante!','t-err');return;}
+  await db.ref('adminUnlocks/'+matchId+'/'+uid).set(true);
+  const u=_users[uid];
+  const m=_matches[matchId];
+  toast('🔓 '+( u?.name||uid)+' desbloqueado para '+m?.t1+' × '+m?.t2);
+}
+
+async function adminRelockUser(matchId, uid){
+  await db.ref('adminUnlocks/'+matchId+'/'+uid).remove();
+  const u=_users[uid];
+  toast('🔒 '+(u?.name||uid)+' bloqueado novamente.');
+}
+
+async function adminToggleLock(id){
+  const m=_matches[id];
+  if(!m)return;
+  if(hasStarted(m)){toast('Jogo já começou — não pode desbloquear.','t-err');return;}
+  const cur=m.adminLock;
+  let next;
+  if(cur===true)next=null;       // bloqueado → volta ao automático
+  else if(cur===false)next=true;  // desbloqueado → bloquear
+  else next=false;                // automático → desbloquear
+  await db.ref('matches/'+id+'/adminLock').set(next);
+  const msg=next===true?'🔒 Jogo bloqueado manualmente.':next===false?'🔓 Jogo desbloqueado manualmente.':'↩️ Voltou ao bloqueio automático (1h antes).';
+  toast(msg);
+}
 async function delUser(uid){if(!confirm('Remover participante?'))return;await db.ref('users/'+uid).remove();await db.ref('preds/'+uid).remove();toast('Participante removido.');}
 
 function renderAdminMatches(){
@@ -1572,7 +1618,17 @@ function renderAdminMatches(){
           const parts=(u.name||'').trim().split(' ').filter(Boolean);
           const dispName=parts.length>1?parts[0]+' '+parts[parts.length-1][0]+'.':parts[0]||'?';
           return`<span class="chip ${pts===3?'cx':pts>=1?'cp':'cn'}">${dispName}: ${p.s1}×${p.s2} +${pts}</span>`;}).join('')}</div></div>`:'';
-    return`<div class="adm-row" style="flex-direction:column;align-items:stretch"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px"><div class="ari"><strong>${m.f1} ${m.t1} × ${m.f2} ${m.t2} ${apiTag}</strong><span>${m.phase} · ${ds}</span></div><div style="display:flex;align-items:center;gap:6px">${res}<button class="del-btn" onclick="delMatch('${m.id}')">✕</button></div></div>${ph}</div>`;
+    // Build per-user unlock chips
+    const userList=Object.entries(_users).filter(([uid,u])=>u?.name||u?.email);
+    const unlockChips=userList.map(([uid,u])=>{
+      const unlocked=_adminUnlocks[m.id]&&_adminUnlocks[m.id][uid]===true;
+      const dispName=(u.name||u.email||'?').split(' ')[0];
+      return`<button onclick="${unlocked?`adminRelockUser('${m.id}','${uid}')`:`adminUnlockUser('${m.id}','${uid}')`}" style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;border:1px solid ${unlocked?'rgba(0,214,126,.5)':'rgba(110,142,168,.3)'};background:${unlocked?'rgba(0,214,126,.12)':'rgba(110,142,168,.08)'};color:${unlocked?'var(--green)':'var(--muted)'};cursor:pointer;font-family:'Barlow',sans-serif;transition:.15s" title="${unlocked?'Clique para bloquear novamente':'Clique para liberar palpite'}">${unlocked?'🔓':'🔒'} ${dispName}</button>`;
+    }).join('');
+    const unlockPanel=userList.length?`<div style="padding:8px 0 4px;border-top:1px solid var(--border);margin-top:6px"><p style="font-size:11px;color:var(--muted);margin-bottom:6px">🔓 Liberar palpite individual <span style="font-size:10px">(verde = liberado)</span>:</p><div style="display:flex;flex-wrap:wrap;gap:5px">${unlockChips}</div></div>`:'';
+    return`<div class="adm-row" style="flex-direction:column;align-items:stretch"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px"><div class="ari"><strong>${m.f1} ${m.t1} × ${m.f2} ${m.t2} ${apiTag}</strong><span>${m.phase} · ${ds}</span></div><div style="display:flex;align-items:center;gap:6px">${res}<button class="del-btn" onclick="delMatch('${m.id}')">✕</button>
+              <button onclick="adminToggleLock('${m.id}')" style="background:none;border:1px solid ${m.adminLock===true?'rgba(245,197,24,.4)':m.adminLock===false?'rgba(0,214,126,.4)':'rgba(255,255,255,.1)'};color:${m.adminLock===true?'var(--gold)':m.adminLock===false?'var(--green)':'var(--muted)'};padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:'Barlow',sans-serif" title="${m.adminLock===true?'Clique para voltar ao automático':m.adminLock===false?'Clique para bloquear':'Clique para desbloquear manualmente'}">${m.adminLock===true?'🔒 Bloqueado':m.adminLock===false?'🔓 Desbloqueado':'⚙️ Auto'}</button>
+            </div></div>${ph}${unlockPanel}</div>`;
   }).join(''):'<p style="font-size:13px;color:var(--muted)">Nenhuma partida. Importe via API ou adicione manualmente.</p>';
 }
 
