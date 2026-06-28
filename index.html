@@ -158,6 +158,8 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .cx{background:rgba(0,214,126,.14);color:var(--green)}
 .cp{background:rgba(245,197,24,.14);color:var(--gold)}
 .cn{background:rgba(231,76,60,.12);color:var(--red)}
+.c5{background:linear-gradient(135deg,#b8f0ff,#dff6ff,#b8f0ff);color:#005a8c;border:1px solid rgba(120,210,255,.85);box-shadow:0 0 10px rgba(100,210,255,.55),0 0 3px rgba(255,255,255,.4);font-weight:800;text-shadow:0 0 4px rgba(100,210,255,.6)}
+.c2{background:rgba(58,155,213,.18);color:var(--blue);border:1px solid rgba(58,155,213,.3)}
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
 .modal-bg.on{display:flex}
 .modal{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:28px 24px;width:100%;max-width:380px}
@@ -577,7 +579,7 @@ const ADMIN_HASH = 'db6f20ac0787ad306f4df4efbe6e21586b7dfeea039582cd67a9fb4a4a8c
 
 // ══ STATE ════════════════════════════════════════════
 let auth, db, currentUser=null, userProfile=null, isAdminSession=false;
-let _matches={}, _preds={}, _users={}, _finalPreds={}, _finalResult={};
+let _matches={}, _preds={}, _users={}, _finalPreds={}, _finalResult={}, _adminUnlocks={};
 let currentPage='inicio';
 const PAGES=['inicio','jogos','grupos','chaveamento','ranking','regras','admin'];
 
@@ -986,6 +988,11 @@ function setupListeners(){
     if(currentPage==='ranking')renderRanking();
     if(currentPage==='admin'&&isAdminSession)renderAdminUsers();
   });
+  db.ref('adminUnlocks').on('value',snap=>{
+    _adminUnlocks=snap.val()||{};
+    if(currentPage==='jogos')renderMatches();
+    if(currentPage==='admin'&&isAdminSession)renderAdminMatches();
+  });
   db.ref('finalPreds').on('value',snap=>{
     _finalPreds=snap.val()||{};
     if(currentPage==='inicio')renderInicio();
@@ -1129,7 +1136,19 @@ function calcFinalBonus(uid){
 
 // ══ GAME LOGIC ════════════════════════════════════════
 const isFinished=m=>m.r1!=null&&m.r2!=null;
-const isLocked=m=>Date.now()>=new Date(m.dt).getTime()-3600000;
+const hasStarted=m=>Date.now()>=new Date(m.dt).getTime();
+const isLockedForUser=(m,uid)=>{
+  // Admin desbloqueou especificamente este usuário neste jogo?
+  if(_adminUnlocks[m.id]&&_adminUnlocks[m.id][uid]===true)return false;
+  // Jogo já começou → bloqueado (exceto unlock acima)
+  if(hasStarted(m))return true;
+  // Override manual do admin para todos
+  if(m.adminLock===true)return true;
+  if(m.adminLock===false)return false;
+  // Regra automática: 1h antes
+  return Date.now()>=new Date(m.dt).getTime()-3600000;
+};
+const isLocked=m=>isLockedForUser(m, currentUser?.uid||'');
 const myPred=mid=>_preds[currentUser?.uid]?.[mid]||null;
 
 function getWinner(m){
@@ -1188,22 +1207,25 @@ function renderMatches(){
 }
 
 function buildCard(m){
-  const locked=isLocked(m),fin=isFinished(m),pred=myPred(m.id);
+  const fin=isFinished(m),pred=myPred(m.id);
+  const userUnlocked=!!(_adminUnlocks[m.id]&&_adminUnlocks[m.id][currentUser?.uid]===true);
+  const locked=!userUnlocked&&isLocked(m); // unlock bypasses lock
   const dt=new Date(m.dt);
   const ds=dt.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
   const ts=dt.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-  let cls='mc'+(locked&&!fin?' locked':'')+(fin?' finished':'')+(m.type==='elim'?' elim':'');
+  let cls='mc'+(locked&&!fin?' locked':'')+(fin&&!userUnlocked?' finished':'')+(m.type==='elim'?' elim':'');
   let metaL='',metaR=`<span class="mc-time">${ts} · ${ds}</span>`,ptsB='';
-  if(fin){
+  if(fin&&!userUnlocked){
     metaL='<span class="badge b-gray">Encerrado</span>';
     if(pred&&pred.s1!==undefined){
       const p=calcPts(pred,m);
       ptsB=p===3?'<span class="badge b-green">+3 pts · placar exato</span>':p>=2?`<span class="badge b-green">+${p} pts</span>`:p===1?'<span class="badge b-gold">+1 pt</span>':'<span class="badge b-red">0 pts</span>';
     }else ptsB='<span class="badge b-red">sem palpite</span>';
-  }else if(locked){
+  }else if(locked&&!userUnlocked){
     const ms2=new Date(m.dt).getTime()-Date.now();
     const lbl=ms2<0?'em andamento':`começa em ${ms2<3600000?Math.ceil(ms2/60000)+'min':Math.ceil(ms2/3600000)+'h'}`;
-    metaL=`<span style="font-size:11px;font-weight:700;color:var(--gold)">🔒 BLOQUEADO · ${lbl}</span>`;
+    const adminTag=m.adminLock===true?' <span style="font-size:9px;background:rgba(245,197,24,.2);color:var(--gold);padding:1px 6px;border-radius:10px;vertical-align:middle">ADM</span>':m.adminLock===false?' <span style="font-size:9px;background:rgba(0,214,126,.2);color:var(--green);padding:1px 6px;border-radius:10px;vertical-align:middle">ADM↑</span>':'';
+  metaL=`<span style="font-size:11px;font-weight:700;color:var(--gold)">🔒 BLOQUEADO · ${lbl}</span>${adminTag}`;
   }else{
     const msL=new Date(m.dt).getTime()-3600000-Date.now();
     const hL=Math.floor(msL/3600000),dL=Math.floor(hL/24);
@@ -1243,7 +1265,8 @@ function buildCard(m){
     }
     const hasSaved=pred&&pred.s1!==undefined;
     const stHtml=hasSaved?'<span style="color:var(--green);font-size:11px">&#10003; salvo</span>':'<span style="color:var(--muted);font-size:11px">&#128393; auto-salva ao digitar</span>';
-    center=`<div class="sinputs"><input class="si" type="number" id="s1_${m.id}" min="0" max="20" placeholder="0" value="${s1}" oninput="autoSave('${m.id}')"/><span class="si-sep">×</span><input class="si" type="number" id="s2_${m.id}" min="0" max="20" placeholder="0" value="${s2}" oninput="autoSave('${m.id}')"/></div>${qs}<div style="text-align:center;margin-top:6px" id="st_${m.id}">${stHtml}</div>`;
+    const unlockBanner=userUnlocked&&fin?`<div style="background:rgba(245,197,24,.1);border:1px solid rgba(245,197,24,.3);border-radius:7px;padding:6px 10px;font-size:11px;color:var(--gold);margin-bottom:6px;text-align:center">⚠️ Liberado pelo admin · Resultado: ${m.r1}×${m.r2}</div>`:'';
+    center=`${unlockBanner}<div class="sinputs"><input class="si" type="number" id="s1_${m.id}" min="0" max="20" placeholder="0" value="${s1}" oninput="autoSave('${m.id}')"/><span class="si-sep">×</span><input class="si" type="number" id="s2_${m.id}" min="0" max="20" placeholder="0" value="${s2}" oninput="autoSave('${m.id}')"/></div>${qs}<div style="text-align:center;margin-top:6px" id="st_${m.id}">${stHtml}</div>`;
   }
   return `<div class="${cls}"><div class="mc-top"><div style="display:flex;align-items:center;flex-wrap:wrap;gap:5px">${metaL}${ptsB}</div>${metaR}</div><div class="mc-teams"><div class="team">${teamFlagImg(m.t1)}<div class="team-name">${m.t1}</div></div><div class="vs">${center}</div><div class="team">${teamFlagImg(m.t2)}<div class="team-name">${m.t2}</div></div></div></div>`;
 }
@@ -1251,6 +1274,7 @@ function buildCard(m){
 const _autoTimers={};
 function autoSave(mid){
   const m=_matches[mid];
+  // isLocked already respects adminUnlocks, so this check is enough
   if(!m||isLocked(m))return;
   clearTimeout(_autoTimers[mid]);
   const st=document.getElementById('st_'+mid);
@@ -1262,6 +1286,9 @@ async function savePred(mid){
   const s1v=document.getElementById('s1_'+mid)?.value;
   const s2v=document.getElementById('s2_'+mid)?.value;
   if(s1v===''||s2v==='')return;
+  // Block if locked (but allow if admin-unlocked even for finished matches)
+  const m=_matches[mid];
+  if(m&&isLocked(m)){return;} // isLocked already checks adminUnlocks
   const clf=document.getElementById('q_'+mid)?.value||null;
   const st=document.getElementById('st_'+mid);
   try{
@@ -1553,6 +1580,34 @@ async function setResult(mid){
 }
 
 async function delMatch(id){if(!confirm('Remover esta partida?'))return;await db.ref('matches/'+id).remove();toast('Partida removida.');}
+
+async function adminUnlockUser(matchId, uid){
+  if(!matchId||!uid){toast('Selecione um jogo e um participante!','t-err');return;}
+  await db.ref('adminUnlocks/'+matchId+'/'+uid).set(true);
+  const u=_users[uid];
+  const m=_matches[matchId];
+  toast('🔓 '+( u?.name||uid)+' desbloqueado para '+m?.t1+' × '+m?.t2);
+}
+
+async function adminRelockUser(matchId, uid){
+  await db.ref('adminUnlocks/'+matchId+'/'+uid).remove();
+  const u=_users[uid];
+  toast('🔒 '+(u?.name||uid)+' bloqueado novamente.');
+}
+
+async function adminToggleLock(id){
+  const m=_matches[id];
+  if(!m)return;
+  if(hasStarted(m)){toast('Jogo já começou — não pode desbloquear.','t-err');return;}
+  const cur=m.adminLock;
+  let next;
+  if(cur===true)next=null;       // bloqueado → volta ao automático
+  else if(cur===false)next=true;  // desbloqueado → bloquear
+  else next=false;                // automático → desbloquear
+  await db.ref('matches/'+id+'/adminLock').set(next);
+  const msg=next===true?'🔒 Jogo bloqueado manualmente.':next===false?'🔓 Jogo desbloqueado manualmente.':'↩️ Voltou ao bloqueio automático (1h antes).';
+  toast(msg);
+}
 async function delUser(uid){if(!confirm('Remover participante?'))return;await db.ref('users/'+uid).remove();await db.ref('preds/'+uid).remove();toast('Participante removido.');}
 
 function renderAdminMatches(){
@@ -1571,8 +1626,14 @@ function renderAdminMatches(){
           // Build display name: full first name + last initial if name has multiple parts
           const parts=(u.name||'').trim().split(' ').filter(Boolean);
           const dispName=parts.length>1?parts[0]+' '+parts[parts.length-1][0]+'.':parts[0]||'?';
-          return`<span class="chip ${pts===3?'cx':pts>=1?'cp':'cn'}">${dispName}: ${p.s1}×${p.s2} +${pts}</span>`;}).join('')}</div></div>`:'';
-    return`<div class="adm-row" style="flex-direction:column;align-items:stretch"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px"><div class="ari"><strong>${m.f1} ${m.t1} × ${m.f2} ${m.t2} ${apiTag}</strong><span>${m.phase} · ${ds}</span></div><div style="display:flex;align-items:center;gap:6px">${res}<button class="del-btn" onclick="delMatch('${m.id}')">✕</button></div></div>${ph}</div>`;
+          const chipCls=pts>=5?'c5':pts===3?'cx':pts===2?'c2':pts>=1?'cp':'cn';
+          const clfInfo=p.clf?` ✓ ${p.clf}`:'';
+          const ptsStar=pts>=5?'⭐':'';
+          return`<span class="chip ${chipCls}" title="${dispName}: ${p.s1}×${p.s2}${clfInfo} = +${pts} pts">${ptsStar}${dispName}: ${p.s1}×${p.s2}${clfInfo} +${pts}</span>`;}).join('')}</div></div>`:'';
+
+    return`<div class="adm-row" style="flex-direction:column;align-items:stretch"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px"><div class="ari"><strong>${m.f1} ${m.t1} × ${m.f2} ${m.t2} ${apiTag}</strong><span>${m.phase} · ${ds}</span></div><div style="display:flex;align-items:center;gap:6px">${res}<button class="del-btn" onclick="delMatch('${m.id}')">✕</button>
+              <button onclick="adminToggleLock('${m.id}')" style="background:none;border:1px solid ${m.adminLock===true?'rgba(245,197,24,.4)':m.adminLock===false?'rgba(0,214,126,.4)':'rgba(255,255,255,.1)'};color:${m.adminLock===true?'var(--gold)':m.adminLock===false?'var(--green)':'var(--muted)'};padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:'Barlow',sans-serif" title="${m.adminLock===true?'Clique para voltar ao automático':m.adminLock===false?'Clique para bloquear':'Clique para desbloquear manualmente'}">${m.adminLock===true?'🔒 Bloqueado':m.adminLock===false?'🔓 Desbloqueado':'⚙️ Auto'}</button>
+            </div></div>${ph}</div>`;
   }).join(''):'<p style="font-size:13px;color:var(--muted)">Nenhuma partida. Importe via API ou adicione manualmente.</p>';
 }
 
