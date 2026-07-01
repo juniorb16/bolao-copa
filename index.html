@@ -158,7 +158,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .cx{background:rgba(0,214,126,.14);color:var(--green)}
 .cp{background:rgba(245,197,24,.14);color:var(--gold)}
 .cn{background:rgba(231,76,60,.12);color:var(--red)}
-.c5{background:linear-gradient(135deg,rgba(245,197,24,.35),rgba(255,165,0,.25));color:#f5c518;border:1px solid rgba(245,197,24,.6);box-shadow:0 0 8px rgba(245,197,24,.4);font-weight:800}
+.c5{background:linear-gradient(135deg,#b8f0ff,#dff6ff,#b8f0ff);color:#005a8c;border:1px solid rgba(120,210,255,.85);box-shadow:0 0 10px rgba(100,210,255,.55),0 0 3px rgba(255,255,255,.4);font-weight:800;text-shadow:0 0 4px rgba(100,210,255,.6)}
 .c2{background:rgba(58,155,213,.18);color:var(--blue);border:1px solid rgba(58,155,213,.3)}
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
 .modal-bg.on{display:flex}
@@ -1630,17 +1630,10 @@ function renderAdminMatches(){
           const clfInfo=p.clf?` ✓ ${p.clf}`:'';
           const ptsStar=pts>=5?'⭐':'';
           return`<span class="chip ${chipCls}" title="${dispName}: ${p.s1}×${p.s2}${clfInfo} = +${pts} pts">${ptsStar}${dispName}: ${p.s1}×${p.s2}${clfInfo} +${pts}</span>`;}).join('')}</div></div>`:'';
-    // Per-user unlock chips
-    const userList=Object.entries(_users).filter(([uid,u])=>u?.name||u?.email);
-    const unlockChips=userList.map(([uid,u])=>{
-      const isUnlocked=!!(_adminUnlocks[m.id]&&_adminUnlocks[m.id][uid]===true);
-      const dispName=(u.name||u.email||'?').split(' ')[0];
-      return`<button onclick="${isUnlocked?`adminRelockUser('${m.id}','${uid}')`:`adminUnlockUser('${m.id}','${uid}')`}" style="font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;border:1px solid ${isUnlocked?'rgba(0,214,126,.5)':'rgba(110,142,168,.3)'};background:${isUnlocked?'rgba(0,214,126,.12)':'rgba(110,142,168,.08)'};color:${isUnlocked?'var(--green)':'var(--muted)'};cursor:pointer;font-family:'Barlow',sans-serif" title="${isUnlocked?'Clique para bloquear novamente':'Clique para liberar palpite'}">${isUnlocked?'🔓':'🔒'} ${dispName}</button>`;
-    }).join('');
-    const unlockPanel=userList.length?`<div style="padding:8px 0 4px;border-top:1px solid var(--border);margin-top:6px"><p style="font-size:11px;color:var(--muted);margin-bottom:6px">🔓 Liberar palpite por participante <span style="font-size:10px;color:var(--green)">(verde = liberado)</span>:</p><div style="display:flex;flex-wrap:wrap;gap:5px">${unlockChips}</div></div>`:'';
+
     return`<div class="adm-row" style="flex-direction:column;align-items:stretch"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px"><div class="ari"><strong>${m.f1} ${m.t1} × ${m.f2} ${m.t2} ${apiTag}</strong><span>${m.phase} · ${ds}</span></div><div style="display:flex;align-items:center;gap:6px">${res}<button class="del-btn" onclick="delMatch('${m.id}')">✕</button>
               <button onclick="adminToggleLock('${m.id}')" style="background:none;border:1px solid ${m.adminLock===true?'rgba(245,197,24,.4)':m.adminLock===false?'rgba(0,214,126,.4)':'rgba(255,255,255,.1)'};color:${m.adminLock===true?'var(--gold)':m.adminLock===false?'var(--green)':'var(--muted)'};padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:'Barlow',sans-serif" title="${m.adminLock===true?'Clique para voltar ao automático':m.adminLock===false?'Clique para bloquear':'Clique para desbloquear manualmente'}">${m.adminLock===true?'🔒 Bloqueado':m.adminLock===false?'🔓 Desbloqueado':'⚙️ Auto'}</button>
-            </div></div>${ph}${unlockPanel}</div>`;
+            </div></div>${ph}</div>`;
   }).join(''):'<p style="font-size:13px;color:var(--muted)">Nenhuma partida. Importe via API ou adicione manualmente.</p>';
 }
 
