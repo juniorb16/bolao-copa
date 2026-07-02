@@ -1649,7 +1649,7 @@ let _lockChecker=null;
 function startLockChecker(){
   if(_lockChecker)clearInterval(_lockChecker);
   _lockChecker=setInterval(()=>{
-   a const now=Date.now();
+    const now=Date.now();
     const justLocked=Object.values(_matches).some(m=>{
       if(isFinished(m))return false;
       const lockAt=new Date(m.dt).getTime()-3600000;
